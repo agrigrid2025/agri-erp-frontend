@@ -5,6 +5,7 @@ import { EditControl } from 'react-leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
+import { MapContainer, TileLayer, Polygon, Popup } from 'react-leaflet';  // ← Make sure Polygon is here
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
