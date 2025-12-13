@@ -50,7 +50,7 @@ export default function Layout() {
         <nav className="flex-1 overflow-y-auto p-4 space-y-2">
           {/* My Farm */}
           <SidebarSection title="My Farm" icon="🌤️" open={sidebarOpen}>
-            <SidebarLink to="weather" label="Weather Forecast" open={sidebarOpen} />
+            <SidebarLink to={`/dashboard/${tenant}/weather`} label="Weather Forecast" open={sidebarOpen} />
           </SidebarSection>
 
           {/* Inventory */}
