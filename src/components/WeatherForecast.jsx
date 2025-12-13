@@ -66,7 +66,9 @@ export default function WeatherForecast() {
         {forecast.map((day, index) => (
           <div key={index} className="bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition">
             <p className="font-semibold text-gray-700">
-              {index === 0 ? 'Today' : new Date(day.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
+              {index === 0 ? 'Today' :
+              index === 1 ? 'Tomorrow' :
+              new Date(day.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
             </p>
             <div className="text-6xl my-4">
               {weatherIcons[day.weatherCode] || "🌤️"}
