@@ -22,49 +22,30 @@ export default function LoginPage() {
     setError('');
 
     try {
-      let csrfToken = getCookie('csrftoken');
-
-      if (!csrfToken) {
-        await fetch(`https://${tenant}.agrigrid.net/login/`, {
-          credentials: 'include',
-        });
-        csrfToken = getCookie('csrftoken');
-      }
-
-      if (!csrfToken) {
-        setError('Failed to retrieve CSRF token');
-        setLoading(false);
-        return;
-      }
-
-      console.log('CSRF Token:', csrfToken);
-
-      const response = await fetch(`https://${tenant}.agrigrid.net/login/`, {
+      const response = await fetch(`https://${tenant}.agrigrid.net/api/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRFToken': csrfToken,
         },
         body: new URLSearchParams({
-          'username': username,
-          'password': password,
-          'csrfmiddlewaretoken': csrfToken,
+          username,
+          password,
         }),
-        credentials: 'include',
-        redirect: 'follow',
+        credentials: 'include',  // Sends and receives session cookie
       });
 
-      console.log('Login response status:', response.status);
-      console.log('Login response URL:', response.url);
+      const data = await response.json();
 
-      if (response.ok || response.redirected) {
+      console.log('API Login response:', data);
+
+      if (data.success) {
         navigate(`/dashboard/${tenant}`);
       } else {
-        setError('Invalid username or password');
+        setError(data.message || 'Invalid username or password');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Network error — check farm code or server');
+      setError('Cannot reach server. Check farm code.');
     } finally {
       setLoading(false);
     }
