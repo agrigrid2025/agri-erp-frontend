@@ -59,30 +59,101 @@ export default function AgriMapView() {
               }}
             >
               <Popup>
-                <div className="bg-white rounded-2xl shadow-2xl p-6 min-w-[280px]">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-3">{block.name}</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🌱</span>
-                      <span className="text-lg font-medium">
-                        Crop: {block.crop || <span className="text-gray-500">None assigned</span>}
-                      </span>
+                <div className="bg-white rounded-2xl shadow-2xl p-6 min-w-[320px]">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">{block.name}</h3>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6 text-center">
+                    <div>
+                      <p className="text-sm text-gray-600">Crop</p>
+                      <p className="font-bold text-lg">{block.crop || 'None'}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">📏</span>
-                      <span className="text-lg font-medium">
-                        Area: <span className="text-green-600 font-bold">{block.areaHa.toFixed(2)} ha</span>
-                      </span>
+                    <div>
+                      <p className="text-sm text-gray-600">Area</p>
+                      <p className="font-bold text-lg text-green-600">{block.areaHa.toFixed(2)} ha</p>
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-6 border-t border-gray-200">
+                  {/* Action Button Grid */}
+                  <div className="grid grid-cols-5 gap-3">
                     <Link
                       to={`/dashboard/${tenant}/map/assign-crop/${block.id}`}
-                      className="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-center transition"
+                      className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Assign Crop"
                     >
-                      Assign / Change Crop
+                      <div className="text-2xl">🌱</div>
                     </Link>
+
+                    <button
+                      className="bg-blue-100 hover:bg-blue-200 text-blue-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Edit Block"
+                      onClick={() => alert('Edit block coming soon')}
+                    >
+                      <div className="text-2xl">✏️</div>
+                    </button>
+
+                    <button
+                      className="bg-purple-100 hover:bg-purple-200 text-purple-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Crop Record"
+                      onClick={() => alert('Crop record coming soon')}
+                    >
+                      <div className="text-2xl">📋</div>
+                    </button>
+
+                    <button
+                      className="bg-amber-100 hover:bg-amber-200 text-amber-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Fertilizer"
+                      onClick={() => alert('Fertilizer coming soon')}
+                    >
+                      <div className="text-2xl">🧴</div>
+                    </button>
+
+                    <button
+                      className="bg-pink-100 hover:bg-pink-200 text-pink-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Spray"
+                      onClick={() => alert('Spray coming soon')}
+                    >
+                      <div className="text-2xl">🌫️</div>
+                    </button>
+
+                    <button
+                      className="bg-orange-100 hover:bg-orange-200 text-orange-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Harvest"
+                      onClick={() => alert('Harvest coming soon')}
+                    >
+                      <div className="text-2xl">🚜</div>
+                    </button>
+
+                    <button
+                      className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Planning"
+                      onClick={() => alert('Planning coming soon')}
+                    >
+                      <div className="text-2xl">📅</div>
+                    </button>
+
+                    <button
+                      className="bg-red-100 hover:bg-red-200 text-red-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Safety"
+                      onClick={() => alert('Safety coming soon')}
+                    >
+                      <div className="text-2xl">🛡️</div>
+                    </button>
+
+                    <button
+                      className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Notes"
+                      onClick={() => alert('Notes coming soon')}
+                    >
+                      <div className="text-2xl">📝</div>
+                    </button>
+
+                    <button
+                      className="bg-cyan-100 hover:bg-cyan-200 text-cyan-700 p-4 rounded-xl shadow hover:shadow-lg transition transform hover:scale-110"
+                      title="Irrigation"
+                      onClick={() => alert('Irrigation coming soon')}
+                    >
+                      <div className="text-2xl">💧</div>
+                    </button>
                   </div>
                 </div>
               </Popup>
