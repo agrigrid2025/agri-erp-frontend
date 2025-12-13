@@ -34,5 +34,4 @@ export default function Dashboard() {
   );
 }
 
-export default ComponentName;
 export default Dashboard;

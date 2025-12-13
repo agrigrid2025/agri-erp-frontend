@@ -32,5 +32,4 @@ export default function TenantEntry() {
   );
 }
 
-export default ComponentName;
 export default TenantEntry;

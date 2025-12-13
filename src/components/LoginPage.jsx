@@ -58,5 +58,4 @@ const handleLogin = async (e) => {
   }
 };
 
-export default ComponentName;
 export default LoginPage;
