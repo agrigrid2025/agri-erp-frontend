@@ -9,13 +9,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -27,30 +20,30 @@ export default function LoginPage() {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
-          'username': username,
-          'password': password,
+        body: JSON.stringify({
+          username,
+          password,
         }),
-        credentials: 'include',
+        credentials: 'include', // Essential for session cookie
       });
 
-      console.log('POST status:', response.status);
-      console.log('POST ok:', response.ok);
+      const data = await response.json();
+      console.log('Login API response:', data);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Success data:', data);
+      if (data.success) {
+        // Optional: store user info for role checks later
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
         navigate(`/dashboard/${tenant}`);
       } else {
-        const text = await response.text();
-        console.log('Error response:', text);
-        setError('Login failed (wrong credentials or server error)');
+        setError(data.message || 'Invalid username or password');
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(`Cannot reach ${apiUrl}. Check farm code or try again.`);
+      console.error('Login network error:', err);
+      setError('Cannot reach server. Please check your farm code and try again.');
     } finally {
       setLoading(false);
     }
@@ -59,37 +52,58 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-700 to-green-900 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-10 max-w-md w-full">
-        <h2 className="text-3xl font-bold text-center text-green-800 mb-8">
-          {tenant.charAt(0).toUpperCase() + tenant.slice(1)} Farm
-        </h2>
+        <div className="text-center mb-8">
+          <img src="/logo.png" alt="AgriGrid Logo" className="h-16 mx-auto mb-4" />
+          <h2 className="text-3xl font-bold text-green-800">
+            {tenant.charAt(0).toUpperCase() + tenant.slice(1)} Farm
+          </h2>
+          <p className="text-gray-600 mt-2">Sign in to your account</p>
+        </div>
+
         <form onSubmit={handleLogin} className="space-y-6">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500"
-            required
-            disabled={loading}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-6 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500"
-            required
-            disabled={loading}
-          />
-          {error && <p className="text-red-600 text-center font-medium">{error}</p>}
+          <div>
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-6 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500 transition"
+              required
+              disabled={loading}
+              autoFocus
+            />
+          </div>
+
+          <div>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-6 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500 transition"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-600 text-center font-medium bg-red-50 py-3 rounded-lg">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white font-semibold py-4 rounded-xl transition"
+            className="w-full bg-green-700 hover:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition transform hover:scale-105"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Login'}
           </button>
         </form>
+
+        <p className="text-center text-sm text-gray-500 mt-8">
+          Need help? Contact your farm administrator.
+        </p>
       </div>
     </div>
   );
