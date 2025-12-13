@@ -2,18 +2,17 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 const weatherIcons = {
-  1000: "☀️",   // Clear
-  1001: "☁️",   // Cloudy
-  1100: "🌤️",  // Mostly Clear
-  1101: "⛅",   // Partly Cloudy
-  1102: "🌥️",  // Mostly Cloudy
-  2000: "🌫️",   // Fog
-  4000: "🌧️",   // Drizzle
-  4001: "🌧️",   // Rain
-  4200: "🌧️",   // Light Rain
-  4201: "🌧️",   // Heavy Rain
-  8000: "⛈️",   // Thunderstorm
-  // Add more as needed
+  1000: "☀️", // Clear
+  1001: "☁️", // Cloudy
+  1100: "🌤️", // Mostly Clear
+  1101: "⛅", // Partly Cloudy
+  1102: "🌥️", // Mostly Cloudy
+  2000: "🌫️", // Fog
+  4000: "🌦️", // Drizzle
+  4001: "🌧️", // Rain
+  4200: "🌧️", // Light Rain
+  4201: "🌧️", // Heavy Rain
+  8000: "⛈️", // Thunderstorm
 };
 
 export default function WeatherForecast() {
@@ -29,13 +28,10 @@ export default function WeatherForecast() {
         const res = await fetch(`https://${tenant}.agrigrid.net/api/weather/forecast/`, {
           credentials: 'include',
         });
+        if (!res.ok) throw new Error('Failed to load weather data');
         const data = await res.json();
-        if (data.forecast) {
-          setForecast(data.forecast);
-          setLocation(data.location);
-        } else {
-          setError(data.error || 'Failed to load weather');
-        }
+        setForecast(data.forecast || []);
+        setLocation(data.location || {});
       } catch (err) {
         setError('Cannot connect to weather service');
       } finally {
@@ -45,65 +41,100 @@ export default function WeatherForecast() {
     fetchWeather();
   }, [tenant]);
 
-  if (loading) return <p className="text-center text-gray-600">Loading forecast...</p>;
-  if (error) return <p className="text-red-600 text-center">{error}</p>;
+  if (loading) {
+    return <div className="text-center py-32 text-2xl text-gray-600">Loading forecast...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-32 text-2xl text-red-600">{error}</div>;
+  }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8 mb-10 text-center">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">
-        Weather Forecast – {tenant.toUpperCase()}
-      </h1>
-      <p className="text-lg text-gray-700">
-        Forecast location:{' '}
-        <span className="font-mono text-blue-600">
-          {parseFloat(location.lat).toFixed(6)}, {parseFloat(location.lon).toFixed(6)}
-        </span>
-        {' '}
-        <a
-          href={`https://www.google.com/maps?q=${location.lat},${location.lon}&z=16`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          (view on map)
-        </a>
-        {' '}
-        {!location.hasPin && (
-          <Link
-            to={`/dashboard/${tenant}/weather/set-location`}
-            className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header with location */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-10 text-center">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          Weather Forecast – {tenant.toUpperCase()}
+        </h1>
+        <p className="text-lg text-gray-700">
+          Forecast location:{' '}
+          <span className="font-mono text-blue-600">
+            {parseFloat(location.lat).toFixed(6)}, {parseFloat(location.lon).toFixed(6)}
+          </span>
+          {' '}
+          <a
+            href={`https://www.google.com/maps?q=${location.lat},${location.lon}&z=16`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
           >
-            Set Location
-          </Link>
-        )}
-      </p>
-      <p className="text-sm text-gray-500 mt-2">Powered by Tomorrow.io – Hyperlocal & Accurate</p>
-    </div>
+            (view on map)
+          </a>
+          {' '}
+          {!location.hasPin && (
+            <Link
+              to={`/dashboard/${tenant}/weather/set-location`}
+              className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Set Location
+            </Link>
+          )}
+        </p>
+        <p className="text-sm text-gray-500 mt-2">Powered by Tomorrow.io – Hyperlocal & Accurate</p>
+      </div>
 
+      {/* 7-Day Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6">
         {forecast.map((day, index) => (
-          <div key={index} className="bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl transition">
-            <p className="font-semibold text-gray-700">
-              {index === 0 ? 'Today' :
-              index === 1 ? 'Tomorrow' :
-              new Date(day.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
+          <div
+            key={index}
+            className="bg-white rounded-2xl shadow-xl p-6 text-center hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-green-500"
+          >
+            {/* Date Label */}
+            <p className="text-lg font-bold text-gray-900 uppercase tracking-wider mb-2">
+              {index === 0
+                ? 'Today'
+                : index === 1
+                ? 'Tomorrow'
+                : new Date(day.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
             </p>
-            <div className="text-6xl my-4">
-              {weatherIcons[day.weatherCode] || "🌤️"}
+
+            {/* Icon */}
+            <div className="text-7xl my-6">
+              {weatherIcons[day.weatherCode] || "☀️"}
             </div>
-            <div className="text-3xl font-bold text-gray-800">
-              {day.tempMax}°
+
+            {/* Temperatures */}
+            <div className="mb-6">
+              <p className="text-4xl font-bold text-red-600">{day.tempMax}°</p>
+              <p className="text-2xl text-blue-600">{day.tempMin}°</p>
             </div>
-            <div className="text-xl text-gray-600">
-              {day.tempMin}°
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-blue-50 rounded-lg p-3">
+                <span className="text-blue-600">🌧️</span> {day.precipProb}% rain
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <span className="text-gray-600">💨</span> {day.windSpeed} km/h
+              </div>
+              <div className="bg-purple-50 rounded-lg p-3">
+                <span className="text-purple-600">👁️</span> {day.visibility} km
+              </div>
+              <div className="bg-yellow-50 rounded-lg p-3">
+                <span className="text-yellow-600">☀️</span> UV {day.uvIndex}
+              </div>
+              <div className="bg-indigo-50 rounded-lg p-3">
+                <span className="text-indigo-600">☁️</span> {day.cloudCover}% cloud
+              </div>
+              <div className="bg-green-50 rounded-lg p-3">
+                <span className="text-green-600">💧</span> {day.humidity}% RH
+              </div>
             </div>
-            <div className="mt-4 space-y-2 text-sm text-gray-600">
-              <p>🌧️ {day.precipProb}% rain</p>
-              <p>💨 {day.windSpeed} km/h</p>
-              <p>💧 {day.humidity}% humidity</p>
-            </div>
-            {index === 0 && (day.sunrise || day.sunset) && (
-              <div className="mt-4 text-sm border-t pt-2">
+
+            {/* Sunrise/Sunset on Today */}
+            {index === 0 && day.sunrise && (
+              <div className="mt-6 pt-4 border-t text-sm text-gray-600">
                 <p>🌅 {day.sunrise}</p>
                 <p>🌇 {day.sunset}</p>
               </div>
