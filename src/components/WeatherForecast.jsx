@@ -49,18 +49,35 @@ export default function WeatherForecast() {
   if (error) return <p className="text-red-600 text-center">{error}</p>;
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Weather Forecast</h1>
+    <div className="bg-white rounded-2xl shadow-lg p-8 mb-10 text-center">
+      <h1 className="text-4xl font-bold text-gray-800 mb-4">
+        Weather Forecast – {tenant.toUpperCase()}
+      </h1>
+      <p className="text-lg text-gray-700">
+        Forecast location:{' '}
+        <span className="font-mono text-blue-600">
+          {parseFloat(location.lat).toFixed(6)}, {parseFloat(location.lon).toFixed(6)}
+        </span>
+        {' '}
+        <a
+          href={`https://www.google.com/maps?q=${location.lat},${location.lon}&z=16`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
+        >
+          (view on map)
+        </a>
         {!location.hasPin && (
           <Link
             to={`/dashboard/${tenant}/weather/set-location`}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-medium"
+            className="ml-4 inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
-            Set Weather Location
+            Set Location
           </Link>
         )}
-      </div>
+      </p>
+      <p className="text-sm text-gray-500 mt-2">Powered by Tomorrow.io – Hyperlocal & Accurate</p>
+    </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6">
         {forecast.map((day, index) => (

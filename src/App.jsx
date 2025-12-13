@@ -18,6 +18,7 @@ function App() {
             <Route index element={<DashboardHome />} />
             <Route path="weather" element={<WeatherForecast />} />
             <Route path="/dashboard/:tenant/weather/day/:date" element={<DayDetail />} />
+            <Route path="/dashboard/:tenant/weather/set-location" element={<SetWeatherLocation />} />
             {/* Add more routes later: /dashboard/:tenant/inventory etc. */}
           </Route>
         </Routes>
