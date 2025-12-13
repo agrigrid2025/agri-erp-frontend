@@ -67,10 +67,11 @@ export default function WeatherForecast() {
         >
           (view on map)
         </a>
+        {' '}
         {!location.hasPin && (
           <Link
             to={`/dashboard/${tenant}/weather/set-location`}
-            className="ml-4 inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
           >
             Set Location
           </Link>
