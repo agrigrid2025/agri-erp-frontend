@@ -21,31 +21,36 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
+    const apiUrl = `https://${tenant}.agrigrid.net/api/login/`;
+
     try {
-      const response = await fetch(`https://${tenant}.agrigrid.net/api/login/`, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          username,
-          password,
+          'username': username,
+          'password': password,
         }),
-        credentials: 'include',  // Sends and receives session cookie
+        credentials: 'include',
       });
 
-      const data = await response.json();
+      console.log('POST status:', response.status);
+      console.log('POST ok:', response.ok);
 
-      console.log('API Login response:', data);
-
-      if (data.success) {
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Success data:', data);
         navigate(`/dashboard/${tenant}`);
       } else {
-        setError(data.message || 'Invalid username or password');
+        const text = await response.text();
+        console.log('Error response:', text);
+        setError('Login failed (wrong credentials or server error)');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Cannot reach server. Check farm code.');
+      console.error('Fetch error:', err);
+      setError(`Cannot reach ${apiUrl}. Check farm code or try again.`);
     } finally {
       setLoading(false);
     }
