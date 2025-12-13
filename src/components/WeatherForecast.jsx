@@ -71,14 +71,13 @@ export default function WeatherForecast() {
             (view on map)
           </a>
           {' '}
-          {!location.hasPin && (
-            <Link
-              to={`/dashboard/${tenant}/weather/set-location`}
-              className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
-            >
-              Set Location
-            </Link>
-          )}
+          {/* Always show Set Location button for now */}
+          <Link
+            to={`/dashboard/${tenant}/weather/set-location`}
+            className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium ml-4"
+          >
+            {location.hasPin ? 'Change Location' : 'Set Location'}
+          </Link>
         </p>
         <p className="text-sm text-gray-500 mt-2">Powered by Tomorrow.io – Hyperlocal & Accurate</p>
       </div>
