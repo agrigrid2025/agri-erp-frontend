@@ -22,13 +22,12 @@ function App() {
           <Route path="/dashboard/:tenant" element={<Layout />}>
             <Route index element={<DashboardHome />} />
             <Route path="weather" element={<WeatherForecast />} />
-            <Route path="/dashboard/:tenant/weather/day/:date" element={<DayDetail />} />
-            <Route path="/dashboard/:tenant/weather/set-location" element={<SetWeatherLocation />} />
-            <Route path="/dashboard/:tenant/map/blocks" element={<AgriMapView />} />
-            <Route path="/dashboard/:tenant/map/blocks-table" element={<BlocksTable />} />
-            <Route path="/dashboard/:tenant/map/define-blocks" element={<DefineBlocks />} />
-            <Route path="/dashboard/:tenant/map/set-location" element={<SetFarmLocation />} />
-            {/* Add more routes later: /dashboard/:tenant/inventory etc. */}
+            <Route path="weather/day/:date" element={<DayDetail />} />
+            <Route path="weather/set-location" element={<SetWeatherLocation />} />
+            <Route path="map/blocks" element={<AgriMapView />} />
+            <Route path="map/blocks-table" element={<BlocksTable />} />
+            <Route path="map/define-blocks" element={<DefineBlocks />} />
+            <Route path="map/set-location" element={<SetFarmLocation />} />
           </Route>
         </Routes>
       </BrowserRouter>
