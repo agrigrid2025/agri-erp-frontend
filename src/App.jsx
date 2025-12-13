@@ -8,6 +8,9 @@ import WeatherForecast from './components/WeatherForecast';
 import DayDetail from './components/DayDetail';
 import SetWeatherLocation from './components/SetWeatherLocation';
 import AgriMapView from './components/AgriMapView';
+import BlocksTable from './components/BlocksTable';
+import DefineBlocks from './components/DefineBlocks';
+import SetFarmLocation from './components/SetFarmLocation';
 
 function App() {
   return (
