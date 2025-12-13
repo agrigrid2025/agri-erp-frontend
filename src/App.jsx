@@ -14,6 +14,7 @@ function App() {
           <Route path="/login/:tenant" element={<LoginPage />} />
           <Route path="/dashboard/:tenant" element={<Layout />}>
             <Route index element={<DashboardHome />} />
+            <Route path="weather" element={<WeatherForecast />} />
             {/* Add more routes later: /dashboard/:tenant/inventory etc. */}
           </Route>
         </Routes>
