@@ -22,7 +22,7 @@ export default function DefineBlocks() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetch(`https://${tenant}.agrigrid.net/api/map/data/`, { credentials: 'include' })
+    fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/data/`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => setMapData(data));
   }, [tenant]);

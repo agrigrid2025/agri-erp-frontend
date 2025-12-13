@@ -7,7 +7,7 @@ export default function BlocksTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://${tenant}.agrigrid.net/api/map/data/`, { credentials: 'include' })
+    fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/data/`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
         setBlocks(data.blocks || []);
