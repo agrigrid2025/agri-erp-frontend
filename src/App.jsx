@@ -20,6 +20,10 @@ function App() {
             <Route path="weather" element={<WeatherForecast />} />
             <Route path="/dashboard/:tenant/weather/day/:date" element={<DayDetail />} />
             <Route path="/dashboard/:tenant/weather/set-location" element={<SetWeatherLocation />} />
+            <Route path="/dashboard/:tenant/map/blocks" element={<AgriMapView />} />
+            <Route path="/dashboard/:tenant/map/blocks-table" element={<BlocksTable />} />
+            <Route path="/dashboard/:tenant/map/define-blocks" element={<DefineBlocks />} />
+            <Route path="/dashboard/:tenant/map/set-location" element={<SetFarmLocation />} />
             {/* Add more routes later: /dashboard/:tenant/inventory etc. */}
           </Route>
         </Routes>
