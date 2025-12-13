@@ -57,3 +57,6 @@ const handleLogin = async (e) => {
     setLoading(false);
   }
 };
+
+export default ComponentName;
+export default LoginPage;

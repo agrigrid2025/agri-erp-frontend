@@ -31,3 +31,6 @@ export default function TenantEntry() {
     </div>
   );
 }
+
+export default ComponentName;
+export default TenantEntry;

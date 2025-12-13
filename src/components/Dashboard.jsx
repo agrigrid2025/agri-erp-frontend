@@ -33,3 +33,6 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default ComponentName;
+export default Dashboard;
