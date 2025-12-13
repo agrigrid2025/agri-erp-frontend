@@ -5,7 +5,8 @@ import Layout from './components/Layout';
 import DashboardHome from './components/DashboardHome';
 import { AuthProvider } from './context/AuthContext';
 import WeatherForecast from './components/WeatherForecast';
-import DayDetail from './components/DayDetail';  // ← Add this line
+import DayDetail from './components/DayDetail';
+import SetWeatherLocation from './components/SetWeatherLocation';
 
 function App() {
   return (
