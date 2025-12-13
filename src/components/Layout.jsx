@@ -77,7 +77,7 @@ export default function Layout() {
             {isAdmin && (
               <div className="ml-8 mt-2 space-y-1">
                 <p className="text-xs font-medium text-gray-500 uppercase">Settings</p>
-                <SidebarLink to="map/farm-location" label="Define Farm Location" />
+                <SidebarLink to="map/set-location" label="Define Farm Location" />
                 <SidebarLink to="map/define-blocks" label="Define Blocks" />
                 <SidebarLink to="map/crop-types" label="Crop Types" />
               </div>
