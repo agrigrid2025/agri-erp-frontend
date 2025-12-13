@@ -6,9 +6,9 @@ export default function Layout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Get user from localStorage
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
+  const isAdmin = user?.role === 'admin';
 
   const handleLogout = () => {
     fetch(`https://${tenant}.agrigrid.net/logout/`, {
@@ -22,14 +22,10 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar - collapsible */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } flex flex-col`}
-      >
-        {/* Logo Header */}
-        <div className="p-6 border-b flex items-center justify-between">
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col`}>
+        {/* Logo */}
+        <div className="p-6 border-b">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="AgriGrid Logo" className="h-10 w-auto" />
             <div>
@@ -37,15 +33,6 @@ export default function Layout() {
               <p className="text-xs text-gray-600 uppercase">{tenant}</p>
             </div>
           </div>
-          {/* Close button on mobile */}
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded hover:bg-gray-100"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
         {/* Menu */}
@@ -62,11 +49,68 @@ export default function Layout() {
             <SidebarLink to="inventory/po" label="Purchase Orders" />
             <SidebarLink to="inventory/receipts" label="Purchase Receipts" />
             <SidebarLink to="inventory/stock" label="Stock by Location" />
-            {/* Admin settings... */}
+            {isAdmin && (
+              <div className="ml-8 mt-2 space-y-1">
+                <p className="text-xs font-medium text-gray-500 uppercase">Settings</p>
+                <SidebarLink to="inventory/uom" label="Units of Measure" />
+                <SidebarLink to="inventory/categories" label="Item Categories" />
+                <SidebarLink to="inventory/warehouses" label="Warehouses" />
+                <SidebarLink to="inventory/locations" label="Locations" />
+                <SidebarLink to="inventory/adjust" label="Adjust Stock" />
+              </div>
+            )}
           </SidebarSection>
 
-          {/* Add your other sections here exactly as before */}
-          {/* AgriMap, AgriSafe, AgriSpray, Equipment, etc. */}
+          {/* AgriMap */}
+          <SidebarSection title="AgriMap" icon="🗺️">
+            <SidebarLink to="map/blocks" label="Blocks (Map)" />
+            <SidebarLink to="map/blocks-table" label="Blocks (Table)" />
+            {isAdmin && (
+              <div className="ml-8 mt-2 space-y-1">
+                <p className="text-xs font-medium text-gray-500 uppercase">Settings</p>
+                <SidebarLink to="map/farm-location" label="Define Farm Location" />
+                <SidebarLink to="map/define-blocks" label="Define Blocks" />
+                <SidebarLink to="map/crop-types" label="Crop Types" />
+              </div>
+            )}
+          </SidebarSection>
+
+          {/* AgriSafe */}
+          <SidebarSection title="AgriSafe" icon="🛡️">
+            <SidebarLink to="safety/hazards" label="Hazard Register" />
+            <SidebarLink to="safety/incidents" label="Incident Register" />
+            {isAdmin && (
+              <>
+                <SidebarLink to="safety/hazard-types" label="Hazard Types" />
+                <SidebarLink to="safety/incident-types" label="Incident Types" />
+              </>
+            )}
+          </SidebarSection>
+
+          {/* AgriSpray */}
+          <SidebarSection title="AgriSpray" icon="🌫️">
+            <SidebarLink to="spray/plans" label="Spray Plans" />
+          </SidebarSection>
+
+          {/* Equipment */}
+          <SidebarSection title="Equipment" icon="🚜">
+            <SidebarLink to="equipment/list" label="Equipment List" />
+            {isAdmin && (
+              <div className="ml-8 mt-2 space-y-1">
+                <p className="text-xs font-medium text-gray-500 uppercase">Settings</p>
+                <SidebarLink to="equipment/types" label="Equipment Types" />
+              </div>
+            )}
+          </SidebarSection>
+
+          {/* Admin Settings */}
+          {isAdmin && (
+            <SidebarSection title="Admin Settings" icon="⚙️">
+              <SidebarLink to="admin/users" label="User Management" />
+              <SidebarLink to="admin/company" label="Company Settings" />
+              <SidebarLink to="admin/global" label="Global Settings" />
+            </SidebarSection>
+          )}
         </nav>
 
         {/* Bottom: User + Logout */}
@@ -95,7 +139,7 @@ export default function Layout() {
         />
       )}
 
-      {/* Mobile hamburger */}
+      {/* Mobile hamburger button */}
       <button
         onClick={() => setSidebarOpen(true)}
         className="fixed top-4 left-4 z-40 lg:hidden p-3 bg-white rounded-lg shadow-lg hover:shadow-xl"
@@ -105,7 +149,7 @@ export default function Layout() {
         </svg>
       </button>
 
-      {/* Main Content - full width */}
+      {/* Main content */}
       <main className="flex-1 p-8 lg:p-12 overflow-auto">
         <Outlet />
       </main>
@@ -113,7 +157,7 @@ export default function Layout() {
   );
 }
 
-// Sidebar helpers (keep these)
+// Sidebar helpers
 function SidebarSection({ title, icon, children }) {
   const [isOpen, setIsOpen] = useState(true);
 
