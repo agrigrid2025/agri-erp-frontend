@@ -4,14 +4,23 @@ const handleLogin = async (e) => {
   setError('');
 
   try {
-    // Get CSRF token from cookie (Django sets it on any GET)
-    const csrfToken = getCookie('csrftoken');
+    // Get CSRF token from cookie
+    let csrfToken = getCookie('csrftoken');
 
+    // If no cookie yet, force a GET to set it
     if (!csrfToken) {
-      setError('CSRF token missing. Try refreshing.');
-      setLoading(false);
-      return;
+      const getResp = await fetch(`https://${tenant}.agrigrid.net/login/`, {
+        credentials: 'include',
+      });
+      csrfToken = getCookie('csrftoken');
+      if (!csrfToken) {
+        setError('Failed to get CSRF token');
+        setLoading(false);
+        return;
+      }
     }
+
+    console.log('CSRF Token:', csrfToken); // For debugging — check browser console
 
     const response = await fetch(`https://${tenant}.agrigrid.net/login/`, {
       method: 'POST',
@@ -20,29 +29,31 @@ const handleLogin = async (e) => {
         'X-CSRFToken': csrfToken,
       },
       body: new URLSearchParams({
-        username,
-        password,
-        csrfmiddlewaretoken: csrfToken,
+        'username': username,
+        'password': password,
+        'csrfmiddlewaretoken': csrfToken,
       }),
       credentials: 'include',
+      redirect: 'follow',  // Important: follow redirects
     });
 
-    if (response.ok || response.status === 302) {
+    console.log('Login response status:', response.status);
+    console.log('Login response URL:', response.url);
+
+    // Django login success usually redirects (302 → 200 on final page)
+    if (response.ok || response.redirected || response.url.includes('/dashboard/') || response.url.includes('/home/')) {
+      // Success!
       navigate(`/dashboard/${tenant}`);
     } else {
+      // Check response text for clues
+      const text = await response.text();
+      console.log('Login failed response:', text.substring(0, 500));
       setError('Invalid username or password');
     }
   } catch (err) {
-    setError('Login failed. Check connection or farm code.');
+    console.error('Login error:', err);
+    setError('Network error — check farm code or server');
   } finally {
     setLoading(false);
   }
-};
-
-// Helper to read cookie
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
 };
