@@ -97,12 +97,14 @@ export default function WeatherForecast() {
           >
             {/* Day of week */}
             <p className="text-lg font-bold text-gray-900 uppercase tracking-wider">
-              {getDayLabel(index)}
+              {index === 0 ? 'TODAY' :
+              index === 1 ? 'TOMORROW' :
+              new Date(day.date).toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()}
             </p>
 
             {/* Date below */}
             <p className="text-xl font-semibold text-gray-700 mb-4">
-              {getDateLabel(index)}
+              {new Date(day.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()}
             </p>
 
             {/* Icon */}
