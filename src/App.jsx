@@ -4,6 +4,7 @@ import LoginPage from './components/LoginPage';
 import Layout from './components/Layout';
 import DashboardHome from './components/DashboardHome';
 import { AuthProvider } from './context/AuthContext';
+import WeatherForecast from './components/WeatherForecast';
 
 function App() {
   return (
