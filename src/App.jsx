@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import WeatherForecast from './components/WeatherForecast';
 import DayDetail from './components/DayDetail';
 import SetWeatherLocation from './components/SetWeatherLocation';
+import AgriMapView from './components/AgriMapView';
 
 function App() {
   return (
