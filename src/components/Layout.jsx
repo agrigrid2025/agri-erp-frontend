@@ -107,7 +107,7 @@ export default function Layout() {
           </SidebarSection>
 
           {/* Equipment */}
-          <SidebarSection title="Equipment" icon="⚙️" open={sidebarOpen}>
+          <SidebarSection title="Equipment" icon="🚜" open={sidebarOpen}>
             <SidebarLink to="equipment/list" label="Equipment List" open={sidebarOpen} />
 
             {isAdmin && (
