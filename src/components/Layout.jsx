@@ -4,7 +4,7 @@ import { Link, Outlet, useParams, useNavigate } from 'react-router-dom';
 export default function Layout() {
   const { tenant } = useParams();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Closed by default on mobile
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Get user from localStorage
   const userJson = localStorage.getItem('user');
@@ -21,86 +21,100 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Top Bar - aligned with sidebar */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-10">
-        <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 rounded hover:bg-gray-100"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <h2 className="text-xl font-semibold text-gray-800">Dashboard</h2>
-          </div>
-          <div className="text-sm text-gray-600">
-            Logged in as <span className="font-medium">{user?.username || 'User'}</span>
-            {user?.role && <span className="ml-2 text-green-600">({user.role})</span>}
-          </div>
-        </div>
-      </header>
-
-      <div className="flex flex-1">
-        {/* Sidebar - collapsible */}
-        <aside className={`fixed inset-y-0 left-0 z-20 w-64 bg-white shadow-lg transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="h-full flex flex-col">
-            {/* Logo */}
-            <div className="p-6 border-b">
-              <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="AgriGrid Logo" className="h-10 w-auto" />
-                <div>
-                  <h1 className="font-bold text-lg text-green-800">AgriGrid</h1>
-                  <p className="text-xs text-gray-600 uppercase">{tenant}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Menu */}
-            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-              {/* Your sidebar sections here — same as before */}
-              {/* Example */}
-              <SidebarSection title="My Farm" icon="🌤️" open={true}>
-                <SidebarLink to="weather" label="Weather Forecast" open={true} />
-              </SidebarSection>
-              {/* ... rest of your sections ... */}
-            </nav>
-
-            {/* Logout */}
-            <div className="p-4 border-t">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-3 py-2 transition"
-              >
-                <span className="text-xl">🚪</span>
-                <span className="font-medium">Logout</span>
-              </button>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar - collapsible */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } flex flex-col`}
+      >
+        {/* Logo Header */}
+        <div className="p-6 border-b flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="AgriGrid Logo" className="h-10 w-auto" />
+            <div>
+              <h1 className="font-bold text-lg text-green-800">AgriGrid</h1>
+              <p className="text-xs text-gray-600 uppercase">{tenant}</p>
             </div>
           </div>
-        </aside>
-
-        {/* Overlay for mobile */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-10 lg:hidden"
+          {/* Close button on mobile */}
+          <button
             onClick={() => setSidebarOpen(false)}
-          />
-        )}
+            className="lg:hidden p-2 rounded hover:bg-gray-100"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-        {/* Main Content */}
-        <main className="flex-1 p-8 overflow-auto">
-          <Outlet />
-        </main>
-      </div>
+        {/* Menu */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {/* My Farm */}
+          <SidebarSection title="My Farm" icon="🌤️">
+            <SidebarLink to="weather" label="Weather Forecast" />
+          </SidebarSection>
+
+          {/* Inventory */}
+          <SidebarSection title="Inventory" icon="📦">
+            <SidebarLink to="inventory/items" label="Items" />
+            <SidebarLink to="suppliers" label="Suppliers" />
+            <SidebarLink to="inventory/po" label="Purchase Orders" />
+            <SidebarLink to="inventory/receipts" label="Purchase Receipts" />
+            <SidebarLink to="inventory/stock" label="Stock by Location" />
+            {/* Admin settings... */}
+          </SidebarSection>
+
+          {/* Add your other sections here exactly as before */}
+          {/* AgriMap, AgriSafe, AgriSpray, Equipment, etc. */}
+        </nav>
+
+        {/* Bottom: User + Logout */}
+        <div className="p-4 border-t space-y-3">
+          {user && (
+            <p className="text-sm text-gray-600 text-center">
+              Logged in as <span className="font-medium">{user.username}</span>
+              {user.role && <span className="ml-1 text-green-600">({user.role})</span>}
+            </p>
+          )}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-3 text-red-600 hover:bg-red-50 rounded-lg px-4 py-2 transition font-medium"
+          >
+            <span className="text-xl">🚪</span>
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="fixed top-4 left-4 z-40 lg:hidden p-3 bg-white rounded-lg shadow-lg hover:shadow-xl"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* Main Content - full width */}
+      <main className="flex-1 p-8 lg:p-12 overflow-auto">
+        <Outlet />
+      </main>
     </div>
   );
 }
 
-// Keep your SidebarSection and SidebarLink helpers as before
-function SidebarSection({ title, icon, children, open }) {
+// Sidebar helpers (keep these)
+function SidebarSection({ title, icon, children }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -114,7 +128,12 @@ function SidebarSection({ title, icon, children, open }) {
           <span className="font-medium text-gray-800">{title}</span>
         </span>
         {children && (
-          <svg className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         )}
@@ -124,7 +143,7 @@ function SidebarSection({ title, icon, children, open }) {
   );
 }
 
-function SidebarLink({ to, label, open }) {
+function SidebarLink({ to, label }) {
   return (
     <Link
       to={to}
