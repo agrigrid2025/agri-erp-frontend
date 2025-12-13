@@ -30,33 +30,42 @@ export default function DefineBlocks() {
   const handleCreated = (e) => {
     const layer = e.layer;
     setDrawnGeoJSON(layer.toGeoJSON().geometry);
+    setMessage('Polygon drawn — enter name and save');
   };
 
   const handleSave = async () => {
-    if (!blockName || !drawnGeoJSON) {
-      setMessage('Please enter a name and draw a block');
+    if (!blockName.trim()) {
+      setMessage('Please enter a block name');
+      return;
+    }
+    if (!drawnGeoJSON) {
+      setMessage('Please draw a polygon first');
       return;
     }
 
     setSaving(true);
     try {
-      const res = await fetch(`https://${tenant}.agrigrid.net/api/map/save-block/`, {
+      const res = await fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/save-block/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: blockName, geojson: drawnGeoJSON }),
+        body: JSON.stringify({
+          name: blockName.trim(),
+          geojson: drawnGeoJSON,
+        }),
         credentials: 'include',
       });
       const data = await res.json();
       if (data.success) {
-        setMessage('Block saved!');
+        setMessage('Block saved successfully!');
         setBlockName('');
         setDrawnGeoJSON(null);
+        // Refresh map data
         window.location.reload();
       } else {
-        setMessage(data.error || 'Save failed');
+        setMessage(data.error || 'Failed to save block');
       }
     } catch (err) {
-      setMessage('Save failed');
+      setMessage('Network error — try again');
     } finally {
       setSaving(false);
     }
@@ -64,17 +73,19 @@ export default function DefineBlocks() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Define Farm Blocks</h1>
-      <p className="text-gray-600 mb-6">
-        Use the polygon tool to draw blocks. Double-click to finish.
-      </p>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Define Farm Blocks</h1>
+        <Link to={`/dashboard/${tenant}/map/blocks`} className="text-blue-600 hover:underline text-lg">
+          ← Back to Map View
+        </Link>
+      </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6" style={{ height: '600px' }}>
         <MapContainer center={[mapData.center.lat, mapData.center.lon]} zoom={16} style={{ height: '100%' }}>
           <TileLayer url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}" subdomains={['mt0','mt1','mt2','mt3']} />
           <FeatureGroup>
             <EditControl
-              position='topleft'
+              position="topleft"
               onCreated={handleCreated}
               draw={{
                 rectangle: false,
@@ -84,17 +95,25 @@ export default function DefineBlocks() {
                 polyline: false,
                 polygon: {
                   shapeOptions: {
-                    color: '#3388ff'
-                  }
-                }
+                    color: '#3388ff',
+                    weight: 4,
+                  },
+                  allowIntersection: false,
+                  showArea: true,
+                },
+              }}
+              edit={{
+                remove: false,
               }}
             />
           </FeatureGroup>
+
+          {/* Existing blocks */}
           {mapData.blocks.map(block => block.geojson && (
             <Polygon
               key={block.id}
               positions={block.geojson.coordinates[0].map(coord => [coord[1], coord[0]])}
-              pathOptions={{ color: block.cropColour || '#3388ff', fillOpacity: 0.5 }}
+              pathOptions={{ color: block.cropColour || '#3388ff', weight: 3, fillOpacity: 0.5 }}
             />
           ))}
         </MapContainer>
@@ -103,30 +122,31 @@ export default function DefineBlocks() {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="flex gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Block Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Block Name
+            </label>
             <input
               type="text"
               value={blockName}
               onChange={(e) => setBlockName(e.target.value)}
               placeholder="e.g. Block 10"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-8 py-3 rounded-lg font-bold"
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold px-8 py-3 rounded-lg transition"
           >
             {saving ? 'Saving...' : 'Save Block'}
           </button>
         </div>
-        {message && <p className={`mt-4 text-center text-lg font-medium ${message.includes('saved') ? 'text-green-600' : 'text-red-600'}`}>{message}</p>}
-      </div>
 
-      <div className="mt-8">
-        <Link to={`/dashboard/${tenant}/map/blocks`} className="text-blue-600 hover:underline">
-          ← Back to Map View
-        </Link>
+        {message && (
+          <p className={`mt-6 text-center text-lg font-medium ${message.includes('success') || message.includes('drawn') ? 'text-green-600' : 'text-red-600'}`}>
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );
