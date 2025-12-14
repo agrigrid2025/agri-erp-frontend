@@ -39,6 +39,7 @@ function App() {
             <Route path="/dashboard/:tenant/admin/company" element={<CompanySettings />} />
             <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
             <Route path="/dashboard/:tenant/admin/users" element={<UserManagement />} />  
+            <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
           </Route>
         </Routes>
       </BrowserRouter>
