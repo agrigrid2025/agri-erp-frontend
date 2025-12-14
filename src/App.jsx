@@ -14,6 +14,8 @@ import SetFarmLocation from './components/SetFarmLocation';
 import UserManagement from './components/UserManagement';
 import UserForm from './components/UserForm';
 import CompanySettings from './components/CompanySettings';
+import GlobalSettings from './components/GlobalSettings';
+
 
 function App() {
   return (
