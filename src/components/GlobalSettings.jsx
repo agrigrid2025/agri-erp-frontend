@@ -73,8 +73,8 @@ export default function GlobalSettings() {
       </div>
 
       {message && (
-        <div className={`p-6 rounded-lg mb-8 ${message.includes('success') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-          <p className="font-medium text-lg">{737 message}</p>
+        <div className={`p-6 rounded-lg mb-8 ${message.includes('success') ? 'bg-green-50 text-green-800 border border-green-300' : 'bg-red-50 text-red-800 border border-red-300'}`}>
+          <p className="font-medium text-lg">{message}</p>
         </div>
       )}
 
