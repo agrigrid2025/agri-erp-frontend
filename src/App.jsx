@@ -13,6 +13,7 @@ import DefineBlocks from './components/DefineBlocks';
 import SetFarmLocation from './components/SetFarmLocation';
 import UserManagement from './components/UserManagement';
 import UserForm from './components/UserForm';
+import CompanySettings from './components/CompanySettings';
 
 function App() {
   return (
