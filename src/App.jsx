@@ -11,6 +11,8 @@ import AgriMapView from './components/AgriMapView';
 import BlocksTable from './components/BlocksTable';
 import DefineBlocks from './components/DefineBlocks';
 import SetFarmLocation from './components/SetFarmLocation';
+import UserManagement from './components/UserManagement';
+import UserForm from './components/UserForm';
 
 function App() {
   return (
