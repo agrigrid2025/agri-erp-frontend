@@ -28,6 +28,9 @@ function App() {
             <Route path="map/blocks-table" element={<BlocksTable />} />
             <Route path="map/define-blocks" element={<DefineBlocks />} />
             <Route path="map/set-location" element={<SetFarmLocation />} />
+            <Route path="/dashboard/:tenant/users" element={<UserManagement />} />
+            <Route path="/dashboard/:tenant/users/add" element={<UserForm mode="add" />} />
+            <Route path="/dashboard/:tenant/users/edit/:userId" element={<UserForm mode="edit" />} />
           </Route>
         </Routes>
       </BrowserRouter>
