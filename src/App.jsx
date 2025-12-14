@@ -33,6 +33,9 @@ function App() {
             <Route path="/dashboard/:tenant/users" element={<UserManagement />} />
             <Route path="/dashboard/:tenant/users/add" element={<UserForm mode="add" />} />
             <Route path="/dashboard/:tenant/users/edit/:userId" element={<UserForm mode="edit" />} />
+            <Route path="/dashboard/:tenant/admin/company" element={<CompanySettings />} />
+            <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
+            <Route path="/dashboard/:tenant/admin/users" element={<UserManagement />} />  
           </Route>
         </Routes>
       </BrowserRouter>
