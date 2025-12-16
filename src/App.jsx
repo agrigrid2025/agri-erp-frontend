@@ -40,6 +40,9 @@ function App() {
             <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
             <Route path="/dashboard/:tenant/admin/users" element={<UserManagement />} />  
             <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
+            <Route path="/dashboard/:tenant/crop-types" element={<CropTypeList />} />
+            <Route path="/dashboard/:tenant/crop-types/add" element={<CropTypeForm />} />
+            <Route path="/dashboard/:tenant/crop-types/edit/:cropId" element={<CropTypeForm />} />
           </Route>
         </Routes>
       </BrowserRouter>
