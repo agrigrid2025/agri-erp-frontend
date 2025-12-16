@@ -35,13 +35,15 @@ function App() {
             <Route path="map/blocks-table" element={<BlocksTable />} />
             <Route path="map/define-blocks" element={<DefineBlocks />} />
             <Route path="map/set-location" element={<SetFarmLocation />} />
+            <Route path="map/crop-types" element={<CropTypeList />} />
+            <Route path="map/crop-types/add" element={<CropTypeForm />} />
+            <Route path="map/crop-types/edit/:cropId" element={<CropTypeForm />} />
             <Route path="/dashboard/:tenant/users" element={<UserManagement />} />
             <Route path="/dashboard/:tenant/users/add" element={<UserForm mode="add" />} />
             <Route path="/dashboard/:tenant/users/edit/:userId" element={<UserForm mode="edit" />} />
             <Route path="/dashboard/:tenant/admin/company" element={<CompanySettings />} />
             <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
             <Route path="/dashboard/:tenant/admin/users" element={<UserManagement />} />  
-            <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
             <Route path="/dashboard/:tenant/crop-types" element={<CropTypeList />} />
             <Route path="/dashboard/:tenant/crop-types/add" element={<CropTypeForm />} />
             <Route path="/dashboard/:tenant/crop-types/edit/:cropId" element={<CropTypeForm />} />
