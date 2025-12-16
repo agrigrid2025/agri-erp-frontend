@@ -15,6 +15,8 @@ import UserManagement from './components/UserManagement';
 import UserForm from './components/UserForm';
 import CompanySettings from './components/CompanySettings';
 import GlobalSettings from './components/GlobalSettings';
+import CropTypeList from './components/CropTypeList';
+import CropTypeForm from './components/CropTypeForm';
 
 
 function App() {
