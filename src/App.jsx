@@ -17,6 +17,7 @@ import CompanySettings from './components/CompanySettings';
 import GlobalSettings from './components/GlobalSettings';
 import CropTypeList from './components/CropTypeList';
 import CropTypeForm from './components/CropTypeForm';
+import AssignCrop from './components/AssignCrop';
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
             <Route path="map/crop-types" element={<CropTypeList />} />
             <Route path="map/crop-types/add" element={<CropTypeForm />} />
             <Route path="map/crop-types/edit/:cropId" element={<CropTypeForm />} />
+            <Route path="map/assign-crop/:blockId" element={<AssignCrop />} />
             <Route path="/dashboard/:tenant/users" element={<UserManagement />} />
             <Route path="/dashboard/:tenant/users/add" element={<UserForm mode="add" />} />
             <Route path="/dashboard/:tenant/users/edit/:userId" element={<UserForm mode="edit" />} />
