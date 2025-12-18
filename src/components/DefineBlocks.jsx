@@ -35,7 +35,7 @@ export default function DefineBlocks() {
     // Disable double-click zoom
     map.doubleClickZoom.disable();
 
-    // Add Geoman controls — toolbar top-left
+    // Add Geoman toolbar
     map.pm.addControls({
       position: 'topleft',
       drawMarker: false,
@@ -45,12 +45,12 @@ export default function DefineBlocks() {
       drawCircle: false,
       drawPolygon: true,
       editMode: true,
+      removalMode: true,
       dragMode: false,
       cutPolygon: false,
-      removalMode: true,
     });
 
-    // When polygon is created
+    // When a polygon is created
     map.on('pm:create', (e) => {
       if (e.shape === 'Polygon') {
         if (drawnLayer) drawnLayer.remove();
@@ -59,6 +59,7 @@ export default function DefineBlocks() {
       }
     });
 
+    // Clean up on unmount
     return () => {
       map.pm.removeControls();
       map.doubleClickZoom.enable();
@@ -111,7 +112,7 @@ export default function DefineBlocks() {
       </div>
 
       <p className="text-gray-600 mb-6">
-        Use the polygon tool (top-left toolbar) to draw blocks. Click to add points, click the first point or use the finish button to complete.
+        Use the polygon tool in the top-left toolbar to draw blocks. Click to add points, click the first point or the finish button to complete.
       </p>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6" style={{ height: '600px' }}>
