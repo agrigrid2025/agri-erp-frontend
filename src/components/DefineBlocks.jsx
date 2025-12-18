@@ -19,6 +19,7 @@ export default function DefineBlocks() {
   const [blockName, setBlockName] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [drawnLayer, setDrawnLayer] = useState(null);
 
   useEffect(() => {
     fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/data/`, { credentials: 'include' })
@@ -31,30 +32,29 @@ export default function DefineBlocks() {
 
     const map = mapRef.current;
 
+    // Add Geoman controls (toolbar visible top-left)
     map.pm.addControls({
       position: 'topleft',
       drawMarker: false,
+      drawCircleMarker: false,
       drawPolyline: false,
       drawRectangle: false,
       drawCircle: false,
-      drawCircleMarker: false,
       drawPolygon: true,
-      editPolygon: true,
-      deleteLayer: true,
+      editMode: true,
+      dragMode: true,
       cutPolygon: false,
+      removalMode: true,
     });
 
-    map.pm.setLang('en');
-
+    // When a polygon is created
     map.on('pm:create', (e) => {
-      const layer = e.layer;
-      const geojson = layer.toGeoJSON().geometry;
-      // Store for save
-      map.currentDrawnLayer = layer;
-      map.currentGeoJSON = geojson;
+      if (drawnLayer) drawnLayer.remove(); // Remove previous
+      setDrawnLayer(e.layer);
       setMessage('Polygon drawn — enter name and save');
     });
 
+    // Clean up
     return () => {
       map.pm.removeControls();
     };
@@ -65,28 +65,26 @@ export default function DefineBlocks() {
       setMessage('Please enter a block name');
       return;
     }
-    if (!mapRef.current?.currentGeoJSON) {
+    if (!drawnLayer) {
       setMessage('Please draw a polygon first');
       return;
     }
 
     setSaving(true);
     try {
+      const geojson = drawnLayer.toGeoJSON().geometry;
       const res = await fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/save-block/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: blockName.trim(),
-          geojson: mapRef.current.currentGeoJSON,
-        }),
+        body: JSON.stringify({ name: blockName.trim(), geojson }),
         credentials: 'include',
       });
       const data = await res.json();
       if (data.success) {
         setMessage('Block saved successfully!');
         setBlockName('');
-        mapRef.current.currentGeoJSON = null;
-        mapRef.current.currentDrawnLayer = null;
+        drawnLayer.remove();
+        setDrawnLayer(null);
         window.location.reload();
       } else {
         setMessage(data.error || 'Save failed');
@@ -107,9 +105,13 @@ export default function DefineBlocks() {
         </Link>
       </div>
 
+      <p className="text-gray-600 mb-6">
+        Use the polygon tool (top-left) to draw blocks. Click to add points, double-click or click the last point to finish.
+      </p>
+
       <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6" style={{ height: '600px' }}>
         <MapContainer
-          whenCreated={(map) => (mapRef.current = map)}
+          whenCreated={map => (mapRef.current = map)}
           center={[mapData.center.lat, mapData.center.lon]}
           zoom={16}
           style={{ height: '100%' }}
