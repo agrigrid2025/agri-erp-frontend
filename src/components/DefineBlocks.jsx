@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapContainer, TileLayer, FeatureGroup, Polygon, Popup } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
+import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
-
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -16,8 +14,8 @@ L.Icon.Default.mergeOptions({
 
 export default function DefineBlocks() {
   const { tenant } = useParams();
+  const mapRef = useRef();
   const [mapData, setMapData] = useState({ blocks: [], center: { lat: -16.992, lon: 145.423 } });
-  const [drawnGeoJSON, setDrawnGeoJSON] = useState(null);
   const [blockName, setBlockName] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -28,18 +26,46 @@ export default function DefineBlocks() {
       .then(data => setMapData(data));
   }, [tenant]);
 
-  const handleCreated = (e) => {
-    const layer = e.layer;
-    setDrawnGeoJSON(layer.toGeoJSON().geometry);
-    setMessage('Polygon drawn — enter name and save');
-  };
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const map = mapRef.current;
+
+    map.pm.addControls({
+      position: 'topleft',
+      drawMarker: false,
+      drawPolyline: false,
+      drawRectangle: false,
+      drawCircle: false,
+      drawCircleMarker: false,
+      drawPolygon: true,
+      editPolygon: true,
+      deleteLayer: true,
+      cutPolygon: false,
+    });
+
+    map.pm.setLang('en');
+
+    map.on('pm:create', (e) => {
+      const layer = e.layer;
+      const geojson = layer.toGeoJSON().geometry;
+      // Store for save
+      map.currentDrawnLayer = layer;
+      map.currentGeoJSON = geojson;
+      setMessage('Polygon drawn — enter name and save');
+    });
+
+    return () => {
+      map.pm.removeControls();
+    };
+  }, [mapRef.current]);
 
   const handleSave = async () => {
     if (!blockName.trim()) {
       setMessage('Please enter a block name');
       return;
     }
-    if (!drawnGeoJSON) {
+    if (!mapRef.current?.currentGeoJSON) {
       setMessage('Please draw a polygon first');
       return;
     }
@@ -51,7 +77,7 @@ export default function DefineBlocks() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: blockName.trim(),
-          geojson: drawnGeoJSON,
+          geojson: mapRef.current.currentGeoJSON,
         }),
         credentials: 'include',
       });
@@ -59,14 +85,14 @@ export default function DefineBlocks() {
       if (data.success) {
         setMessage('Block saved successfully!');
         setBlockName('');
-        setDrawnGeoJSON(null);
-        // Refresh map data
+        mapRef.current.currentGeoJSON = null;
+        mapRef.current.currentDrawnLayer = null;
         window.location.reload();
       } else {
-        setMessage(data.error || 'Failed to save block');
+        setMessage(data.error || 'Save failed');
       }
     } catch (err) {
-      setMessage('Network error — try again');
+      setMessage('Network error');
     } finally {
       setSaving(false);
     }
@@ -82,34 +108,13 @@ export default function DefineBlocks() {
       </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6" style={{ height: '600px' }}>
-        <MapContainer center={[mapData.center.lat, mapData.center.lon]} zoom={16} style={{ height: '100%' }}>
+        <MapContainer
+          whenCreated={(map) => (mapRef.current = map)}
+          center={[mapData.center.lat, mapData.center.lon]}
+          zoom={16}
+          style={{ height: '100%' }}
+        >
           <TileLayer url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}" subdomains={['mt0','mt1','mt2','mt3']} />
-          <FeatureGroup>
-            <EditControl
-              position="topleft"
-              onCreated={handleCreated}
-              draw={{
-                rectangle: false,
-                circle: false,
-                circlemarker: false,
-                marker: false,
-                polyline: false,
-                polygon: {
-                  shapeOptions: {
-                    color: '#3388ff',
-                    weight: 4,
-                  },
-                  allowIntersection: false,
-                  showArea: true,
-                },
-              }}
-              edit={{
-                remove: false,
-              }}
-            />
-          </FeatureGroup>
-
-          {/* Existing blocks */}
           {mapData.blocks.map(block => block.geojson && (
             <Polygon
               key={block.id}
@@ -123,28 +128,26 @@ export default function DefineBlocks() {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="flex gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Block Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Block Name</label>
             <input
               type="text"
               value={blockName}
               onChange={(e) => setBlockName(e.target.value)}
               placeholder="e.g. Block 10"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
             />
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold px-8 py-3 rounded-lg transition"
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold px-8 py-3 rounded-lg"
           >
             {saving ? 'Saving...' : 'Save Block'}
           </button>
         </div>
 
         {message && (
-          <p className={`mt-6 text-center text-lg font-medium ${message.includes('success') || message.includes('drawn') ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`mt-6 text-center text-lg font-medium ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
             {message}
           </p>
         )}
