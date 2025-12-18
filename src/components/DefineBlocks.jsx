@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Polygon } from 'react-leaflet';
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -19,7 +18,8 @@ export default function DefineBlocks() {
   const [blockName, setBlockName] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [drawnGeoJSON, setDrawnGeoJSON] = useState(null);
+  const [drawingLayer, setDrawingLayer] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
 
   useEffect(() => {
     fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/data/`, { credentials: 'include' })
@@ -35,57 +35,112 @@ export default function DefineBlocks() {
     // Disable double-click zoom
     map.doubleClickZoom.disable();
 
-    // Add Geoman controls
-    map.pm.addControls({
-      position: 'topleft',
-      drawMarker: false,
-      drawCircleMarker: false,
-      drawPolyline: false,
-      drawRectangle: false,
-      drawCircle: false,
-      drawPolygon: true,
-      editMode: true,
-      removalMode: true,
-    });
+    const startDrawing = () => {
+      setIsDrawing(true);
+      setMessage('Click on the map to add points. Click the first point or "Finish" to complete.');
 
-    // Listen for polygon creation
-    map.on('pm:create', (e) => {
-      if (e.shape === 'Polygon') {
-        const layer = e.layer;
-        setDrawnGeoJSON(layer.toGeoJSON().geometry);
-        setMessage('Polygon drawn — enter name and save');
+      const layer = L.polygon([], {
+        color: '#3388ff',
+        weight: 4,
+        fillOpacity: 0.5,
+      }).addTo(map);
+
+      setDrawingLayer(layer);
+
+      map.on('click', addPoint);
+    };
+
+    const addPoint = (e) => {
+      if (!isDrawing || !drawingLayer) return;
+
+      const latlngs = drawingLayer.getLatLngs()[0] || [];
+      latlngs.push(e.latlng);
+      drawingLayer.setLatLngs([latlngs]);
+
+      // If clicked near first point, auto-finish
+      if (latlngs.length > 2) {
+        const first = latlngs[0];
+        const last = e.latlng;
+        const dist = first.distanceTo(last);
+        if (dist < 10) { // 10 meters tolerance
+          finishDrawing();
+        }
       }
-    });
+    };
+
+    const finishDrawing = () => {
+      if (!isDrawing || !drawingLayer) return;
+
+      const latlngs = drawingLayer.getLatLngs()[0];
+      if (latlngs.length < 3) {
+        setMessage('Need at least 3 points for a polygon');
+        cancelDrawing();
+        return;
+      }
+
+      setIsDrawing(false);
+      map.off('click', addPoint);
+      setMessage('Polygon complete — enter name and save');
+    };
+
+    const cancelDrawing = () => {
+      if (drawingLayer) drawingLayer.remove();
+      setDrawingLayer(null);
+      setIsDrawing(false);
+      map.off('click', addPoint);
+      setMessage('');
+    };
+
+    const deleteLastPoint = () => {
+      if (!drawingLayer || !isDrawing) return;
+      const latlngs = drawingLayer.getLatLngs()[0];
+      if (latlngs.length > 0) {
+        latlngs.pop();
+        drawingLayer.setLatLngs([latlngs]);
+      }
+    };
+
+    // Expose functions to buttons
+    window.defineBlocksActions = {
+      startDrawing,
+      finishDrawing,
+      cancelDrawing,
+      deleteLastPoint,
+    };
 
     return () => {
-      map.pm.removeControls();
       map.doubleClickZoom.enable();
+      if (drawingLayer) drawingLayer.remove();
+      map.off('click', addPoint);
     };
-  }, [mapRef.current]);
+  }, [mapRef.current, isDrawing]);
 
   const handleSave = async () => {
     if (!blockName.trim()) {
       setMessage('Please enter a block name');
       return;
     }
-    if (!drawnGeoJSON) {
+    if (!drawingLayer) {
       setMessage('Please draw a polygon first');
       return;
     }
 
     setSaving(true);
     try {
+      const geojson = drawingLayer.toGeoJSON().geometry;
       const res = await fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/save-block/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: blockName.trim(), geojson: drawnGeoJSON }),
+        body: JSON.stringify({ name: blockName.trim(), geojson }),
         credentials: 'include',
       });
       const data = await res.json();
       if (data.success) {
         setMessage('Block saved successfully!');
         setBlockName('');
-        setDrawnGeoJSON(null);
+        drawingLayer.remove();
+        setDrawingLayer(null);
+        setIsDrawing(false);
         window.location.reload();
       } else {
         setMessage(data.error || 'Save failed');
@@ -107,8 +162,39 @@ export default function DefineBlocks() {
       </div>
 
       <p className="text-gray-600 mb-6">
-        Use the polygon tool (top-left toolbar) to draw blocks. Click to add points, double-click or click the finish button to complete.
+        Use the buttons below to draw blocks on the map.
       </p>
+
+      {/* Custom Button Toolbar */}
+      <div className="bg-white rounded-xl shadow-lg p-4 mb-6 flex flex-wrap gap-3 justify-center">
+        <button
+          onClick={() => window.defineBlocksActions.startDrawing()}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition"
+        >
+          Start Drawing Polygon
+        </button>
+        <button
+          onClick={() => window.defineBlocksActions.finishDrawing()}
+          disabled={!isDrawing}
+          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition"
+        >
+          Finish Polygon
+        </button>
+        <button
+          onClick={() => window.defineBlocksActions.deleteLastPoint()}
+          disabled={!isDrawing}
+          className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition"
+        >
+          Delete Last Point
+        </button>
+        <button
+          onClick={() => window.defineBlocksActions.cancelDrawing()}
+          disabled={!isDrawing}
+          className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition"
+        >
+          Cancel Drawing
+        </button>
+      </div>
 
       <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6" style={{ height: '600px' }}>
         <MapContainer
@@ -142,7 +228,7 @@ export default function DefineBlocks() {
           </div>
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !drawingLayer}
             className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold px-8 py-3 rounded-lg"
           >
             {saving ? 'Saving...' : 'Save Block'}
