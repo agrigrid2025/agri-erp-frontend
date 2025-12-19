@@ -23,6 +23,9 @@ import HazardForm from './components/HazardForm';
 import HazardDetail from './components/HazardDetail';
 import IncidentTypeList from './components/IncidentTypeList';
 import IncidentTypeForm from './components/IncidentTypeForm';
+import IncidentList from './components/IncidentList';
+import IncidentForm from './components/IncidentForm';
+import IncidentDetail from './components/IncidentDetail';
 
 function App() {
   return (
@@ -67,6 +70,9 @@ function App() {
             <Route path="safety/incident-types" element={<IncidentTypeList />} />
             <Route path="safety/incident-types/add" element={<IncidentTypeForm />} />
             <Route path="safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
+            <Route path="safety/incidents" element={<IncidentList />} />
+            <Route path="safety/incidents/new" element={<IncidentForm />} />
+            <Route path="safety/incidents/:incidentId" element={<IncidentDetail />} />
           </Route>
         </Routes>
       </BrowserRouter>
