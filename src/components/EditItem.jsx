@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function ItemForm() {
   const { tenant } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isEdit = location.pathname.includes('/edit/');
-  const itemId = isEdit ? location.pathname.split('/').pop() : null;
+  const { itemId } = useParams(); // null for add, id for edit
+  const isEdit = !!itemId;
 
   const [formData, setFormData] = useState({
     sku: '',
@@ -38,15 +37,13 @@ export default function ItemForm() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Load dropdown data (you can create separate APIs or fetch from one endpoint)
-    // For now, placeholder — in real app, fetch categories, UOMs, suppliers, warehouses
-    setCategories([]); // Replace with real fetch
-    setUoms([]);
-    setSuppliers([]);
-    setWarehouses([]);
+    // Load dropdown data (replace with real APIs when ready)
+    // setCategories(fetchCategories());
+    // setUoms(fetchUoms());
+    // setSuppliers(fetchSuppliers());
+    // setWarehouses(fetchWarehouses());
 
-    if (isEdit && itemId) {
-      // Load existing item
+    if (isEdit) {
       fetch(`https://${tenant}.agrigrid.net/inventory3/api/items/`, { credentials: 'include' })
         .then(r => r.json())
         .then(data => {
