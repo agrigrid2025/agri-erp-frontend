@@ -28,6 +28,7 @@ import IncidentForm from './components/IncidentForm';
 import IncidentDetail from './components/IncidentDetail';
 import HazardTypeList from './components/HazardTypeList';
 import HazardTypeForm from './components/HazardTypeForm';
+import ItemsList from './components/ItemsList';
 
 
 function App() {
