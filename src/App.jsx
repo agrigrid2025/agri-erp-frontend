@@ -24,7 +24,6 @@ import HazardDetail from './components/HazardDetail';
 import IncidentTypeList from './components/IncidentTypeList';
 import IncidentTypeForm from './components/IncidentTypeForm';
 
-
 function App() {
   return (
     <AuthProvider>
@@ -32,11 +31,16 @@ function App() {
         <Routes>
           <Route path="/" element={<TenantEntry />} />
           <Route path="/login/:tenant" element={<LoginPage />} />
+          
           <Route path="/dashboard/:tenant" element={<Layout />}>
             <Route index element={<DashboardHome />} />
+            
+            {/* Weather */}
             <Route path="weather" element={<WeatherForecast />} />
             <Route path="weather/day/:date" element={<DayDetail />} />
             <Route path="weather/set-location" element={<SetWeatherLocation />} />
+            
+            {/* AgriMap */}
             <Route path="map/blocks" element={<AgriMapView />} />
             <Route path="map/blocks-table" element={<BlocksTable />} />
             <Route path="map/define-blocks" element={<DefineBlocks />} />
@@ -45,21 +49,24 @@ function App() {
             <Route path="map/crop-types/add" element={<CropTypeForm />} />
             <Route path="map/crop-types/edit/:cropId" element={<CropTypeForm />} />
             <Route path="map/assign-crop/:blockId" element={<AssignCrop />} />
-            <Route path="/dashboard/:tenant/users" element={<UserManagement />} />
-            <Route path="/dashboard/:tenant/users/add" element={<UserForm mode="add" />} />
-            <Route path="/dashboard/:tenant/users/edit/:userId" element={<UserForm mode="edit" />} />
-            <Route path="/dashboard/:tenant/admin/company" element={<CompanySettings />} />
-            <Route path="/dashboard/:tenant/admin/global" element={<GlobalSettings />} />
-            <Route path="/dashboard/:tenant/admin/users" element={<UserManagement />} />  
-            <Route path="/dashboard/:tenant/crop-types" element={<CropTypeList />} />
-            <Route path="/dashboard/:tenant/crop-types/add" element={<CropTypeForm />} />
-            <Route path="/dashboard/:tenant/crop-types/edit/:cropId" element={<CropTypeForm />} />
-            <Route path="/dashboard/:tenant/safety/hazards" element={<HazardList />} />
-            <Route path="/dashboard/:tenant/safety/hazards/new" element={<HazardForm />} />
-            <Route path="/dashboard/:tenant/safety/hazards/:hazardId" element={<HazardDetail />} />
-            <Route path="/dashboard/:tenant/safety/incident-types" element={<IncidentTypeList />} />
-            <Route path="/dashboard/:tenant/safety/incident-types/add" element={<IncidentTypeForm />} />
-            <Route path="/dashboard/:tenant/safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
+            
+            {/* User Management */}
+            <Route path="users" element={<UserManagement />} />
+            <Route path="users/add" element={<UserForm mode="add" />} />
+            <Route path="users/edit/:userId" element={<UserForm mode="edit" />} />
+            
+            {/* Admin Settings */}
+            <Route path="admin/company" element={<CompanySettings />} />
+            <Route path="admin/global" element={<GlobalSettings />} />
+            <Route path="admin/users" element={<UserManagement />} />
+            
+            {/* AgriSafe */}
+            <Route path="safety/hazards" element={<HazardList />} />
+            <Route path="safety/hazards/new" element={<HazardForm />} />
+            <Route path="safety/hazards/:hazardId" element={<HazardDetail />} />
+            <Route path="safety/incident-types" element={<IncidentTypeList />} />
+            <Route path="safety/incident-types/add" element={<IncidentTypeForm />} />
+            <Route path="safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
           </Route>
         </Routes>
       </BrowserRouter>
