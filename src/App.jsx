@@ -27,6 +27,7 @@ import IncidentList from './components/IncidentList';
 import IncidentForm from './components/IncidentForm';
 import IncidentDetail from './components/IncidentDetail';
 
+
 function App() {
   return (
     <AuthProvider>
@@ -67,6 +68,9 @@ function App() {
             <Route path="safety/hazards" element={<HazardList />} />
             <Route path="safety/hazards/new" element={<HazardForm />} />
             <Route path="safety/hazards/:hazardId" element={<HazardDetail />} />
+            <Route path="safety/hazard-types" element={<HazardTypeList />} />
+            <Route path="safety/hazard-types/add" element={<HazardTypeForm />} />
+            <Route path="safety/hazard-types/edit/:typeId" element={<HazardTypeForm />} />
             <Route path="safety/incident-types" element={<IncidentTypeList />} />
             <Route path="safety/incident-types/add" element={<IncidentTypeForm />} />
             <Route path="safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
