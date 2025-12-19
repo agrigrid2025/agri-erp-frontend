@@ -4,7 +4,7 @@ import { Link, Outlet, useParams, useNavigate } from 'react-router-dom';
 export default function Layout() {
   const { tenant } = useParams();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile: closed by default
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const userJson = localStorage.getItem('user');
   const user = userJson ? JSON.parse(userJson) : null;
@@ -24,9 +24,8 @@ export default function Layout() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col`}>
-        {/* Logo Header */}
         {/* Logo Header - Clickable to Dashboard Home */}
-        <div className="p-6 border-b">
+        <div className="p-6 border-b flex items-center justify-between">
           <Link to={`/dashboard/${tenant}`} className="flex items-center gap-3 hover:opacity-80 transition">
             <img src="/logo.png" alt="AgriGrid Logo" className="h-10 w-auto" />
             <div>
@@ -34,7 +33,7 @@ export default function Layout() {
               <p className="text-xs text-gray-600 uppercase">{tenant}</p>
             </div>
           </Link>
-        </div>
+
           {/* Mobile close button */}
           <button
             onClick={() => setSidebarOpen(false)}
@@ -168,7 +167,6 @@ export default function Layout() {
   );
 }
 
-// Updated SidebarSection with defaultOpen = false
 function SidebarSection({ title, icon, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
