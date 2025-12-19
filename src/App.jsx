@@ -33,6 +33,8 @@ import ItemForm from './components/ItemForm';
 import ItemDetail from './components/ItemDetail';
 import CategoryList from './components/CategoryList';
 import CategoryForm from './components/CategoryForm';
+import WarehouseList from './components/WarehouseList';
+import WarehouseForm from './components/WarehouseForm';
 
 
 function App() {
@@ -93,6 +95,9 @@ function App() {
             <Route path="inventory/categories" element={<CategoryList />} />
             <Route path="inventory/categories/add" element={<CategoryForm />} />
             <Route path="inventory/categories/edit/:catId" element={<CategoryForm />} />
+            <Route path="inventory/warehouses" element={<WarehouseList />} />
+            <Route path="inventory/warehouses/add" element={<WarehouseForm />} />
+            <Route path="inventory/warehouses/edit/:whId" element={<WarehouseForm />} />
 
           </Route>
         </Routes>

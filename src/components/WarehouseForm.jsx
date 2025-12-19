@@ -1,0 +1,142 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+
+export default function WarehouseForm() {
+  const { tenant } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isEdit = location.pathname.includes('/edit/');
+  const whId = isEdit ? location.pathname.split('/').pop() : null;
+
+  const [formData, setFormData] = useState({
+    name: '',
+    code: '',
+    is_active: true,
+  });
+  const [loading, setLoading] = useState(isEdit);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (isEdit && whId) {
+      fetch(`https://${tenant}.agrigrid.net/inventory3/api/warehouses/`, { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => {
+          const wh = data.warehouses.find(w => w.id === parseInt(whId));
+          if (wh) {
+            setFormData({
+              name: wh.name,
+              code: wh.code,
+              is_active: wh.is_active,
+            });
+          }
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [isEdit, whId, tenant]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage('');
+    try {
+      const res = await fetch(`https://${tenant}.agrigrid.net/inventory3/api/warehouse/save/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData 
+
+, id: isEdit ? whId : undefined }),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Warehouse saved!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/inventory/warehouses`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
+    } catch (err) {
+      setMessage('Network error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="text-center py-20">Loading...</div>;
+
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-8">
+        {isEdit ? 'Edit Warehouse' : 'Add New Warehouse'}
+      </h1>
+
+      <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Code *</label>
+          <input
+            type="text"
+            name="code"
+            value={formData.code}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-4">
+          <input
+            type="checkbox"
+            name="is_active"
+            checked={formData.is_active}
+            onChange={handleChange}
+            className="h-5 w-5 text-green-600 rounded"
+          />
+          <label className="text-gray-700">Active</label>
+        </div>
+
+        <div className="flex justify-end gap-4 pt-6">
+          <Link
+            to={`/dashboard/${tenant}/inventory/warehouses`}
+            className="px-8 py-4 border border-gray-300 rounded-xl text-lg font-medium hover:bg-gray-50 transition"
+          >
+            Cancel
+          </Link>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-12 py-4 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold rounded-xl text-lg transition"
+          >
+            {saving ? 'Saving...' : 'Save Warehouse'}
+          </button>
+        </div>
+
+        {message && (
+          <p className={`text-center text-xl font-medium mt-8 ${message.includes('saved') ? 'text-green-600' : 'text-red-600'}`}>
+            {message}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
