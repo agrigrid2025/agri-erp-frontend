@@ -79,6 +79,12 @@ function App() {
             <Route path="safety/incidents" element={<IncidentList />} />
             <Route path="safety/incidents/new" element={<IncidentForm />} />
             <Route path="safety/incidents/:incidentId" element={<IncidentDetail />} />
+
+            {/* Inventory3 */}
+            <Route path="inventory/items" element={<ItemsList />} />
+            <Route path="inventory/items/new" element={<ItemForm />} />
+            <Route path="inventory/items/:itemId" element={<ItemDetail />} />
+
           </Route>
         </Routes>
       </BrowserRouter>
