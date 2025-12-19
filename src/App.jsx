@@ -21,6 +21,8 @@ import AssignCrop from './components/AssignCrop';
 import HazardList from './components/HazardList';
 import HazardForm from './components/HazardForm';
 import HazardDetail from './components/HazardDetail';
+import IncidentTypeList from './components/IncidentTypeList';
+import IncidentTypeForm from './components/IncidentTypeForm';
 
 
 function App() {
@@ -55,6 +57,9 @@ function App() {
             <Route path="/dashboard/:tenant/safety/hazards" element={<HazardList />} />
             <Route path="/dashboard/:tenant/safety/hazards/new" element={<HazardForm />} />
             <Route path="/dashboard/:tenant/safety/hazards/:hazardId" element={<HazardDetail />} />
+            <Route path="/dashboard/:tenant/safety/incident-types" element={<IncidentTypeList />} />
+            <Route path="/dashboard/:tenant/safety/incident-types/add" element={<IncidentTypeForm />} />
+            <Route path="/dashboard/:tenant/safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
           </Route>
         </Routes>
       </BrowserRouter>
