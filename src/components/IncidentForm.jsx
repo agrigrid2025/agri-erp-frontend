@@ -29,7 +29,7 @@ export default function IncidentForm() {
       .then(data => setIncidentTypes(data.types || []));
 
     if (isEdit && incidentId) {
-      // Load existing incident (you can add an API for single incident if needed)
+      // Load existing incident (replace with real API when available)
       // For now, placeholder - in real app, fetch single incident
       setLoading(false);
     } else {
@@ -47,6 +47,7 @@ export default function IncidentForm() {
       setMessage('Geolocation not supported');
       return;
     }
+    setMessage('Fetching location...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
@@ -61,18 +62,29 @@ export default function IncidentForm() {
     setSaving(true);
     setMessage('');
     try {
-      // Placeholder - add real save endpoint when ready
-      console.log('Saving incident:', formData);
-      setMessage('Incident saved successfully! (placeholder)');
-      setTimeout(() => navigate(`/dashboard/${tenant}/safety/incidents`), 1500);
+      const url = `https://${tenant}.agrigrid.net/agrisafe/api/incident/save/`;
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, id: isEdit ? incidentId : undefined }),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Incident saved successfully!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/safety/incidents`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
     } catch (err) {
-      setMessage('Save failed');
+      setMessage('Network error');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-2xl">Loading...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -124,7 +136,7 @@ export default function IncidentForm() {
             <button
               type="button"
               onClick={getLocation}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
             >
               📍 Use My Location
             </button>
