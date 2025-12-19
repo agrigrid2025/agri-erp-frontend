@@ -18,6 +18,9 @@ import GlobalSettings from './components/GlobalSettings';
 import CropTypeList from './components/CropTypeList';
 import CropTypeForm from './components/CropTypeForm';
 import AssignCrop from './components/AssignCrop';
+import HazardList from './components/HazardList';
+import HazardForm from './components/HazardForm';
+import HazardDetail from './components/HazardDetail';
 
 
 function App() {
@@ -49,6 +52,9 @@ function App() {
             <Route path="/dashboard/:tenant/crop-types" element={<CropTypeList />} />
             <Route path="/dashboard/:tenant/crop-types/add" element={<CropTypeForm />} />
             <Route path="/dashboard/:tenant/crop-types/edit/:cropId" element={<CropTypeForm />} />
+            <Route path="/dashboard/:tenant/safety/hazards" element={<HazardList />} />
+            <Route path="/dashboard/:tenant/safety/hazards/new" element={<HazardForm />} />
+            <Route path="/dashboard/:tenant/safety/hazards/:hazardId" element={<HazardDetail />} />
           </Route>
         </Routes>
       </BrowserRouter>
