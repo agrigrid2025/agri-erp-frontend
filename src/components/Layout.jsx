@@ -25,14 +25,16 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col`}>
         {/* Logo Header */}
-        <div className="p-6 border-b flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/* Logo Header - Clickable to Dashboard Home */}
+        <div className="p-6 border-b">
+          <Link to={`/dashboard/${tenant}`} className="flex items-center gap-3 hover:opacity-80 transition">
             <img src="/logo.png" alt="AgriGrid Logo" className="h-10 w-auto" />
             <div>
               <h1 className="font-bold text-lg text-green-800">AgriGrid</h1>
               <p className="text-xs text-gray-600 uppercase">{tenant}</p>
             </div>
-          </div>
+          </Link>
+        </div>
           {/* Mobile close button */}
           <button
             onClick={() => setSidebarOpen(false)}
