@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 export default function HazardForm() {
   const { tenant } = useParams();
@@ -59,9 +59,10 @@ export default function HazardForm() {
 
   const getLocation = () => {
     if (!navigator.geolocation) {
-      setMessage('Geolocation not supported');
+      setMessage('Geolocation not supported by your browser');
       return;
     }
+    setMessage('Fetching location...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const coords = `${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`;
@@ -78,7 +79,7 @@ export default function HazardForm() {
     try {
       const url = isEdit
         ? `https://${tenant}.agrigrid.net/agrisafe/api/hazard/update/${hazardId}/`
-        : `https://${tenant}.agrigrid.net/agrisafe/api/hazard/create/`;
+        : `https://${tenant}.agrigrid.net/agrisafe/api/hazard/save/`;
 
       const res = await fetch(url, {
         method: 'POST',
@@ -100,7 +101,7 @@ export default function HazardForm() {
     }
   };
 
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -119,7 +120,7 @@ export default function HazardForm() {
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
             >
-              <option value="">Select type</option>
+              <option value="">Select hazard type</option>
               {hazardTypes.map(type => (
                 <option key={type.id} value={type.id}>{type.name}</option>
               ))}
@@ -152,7 +153,7 @@ export default function HazardForm() {
             <button
               type="button"
               onClick={getLocation}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
             >
               📍 Use My Location
             </button>
