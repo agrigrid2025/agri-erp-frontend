@@ -31,6 +31,8 @@ import HazardTypeForm from './components/HazardTypeForm';
 import ItemsList from './components/ItemsList';
 import ItemForm from './components/ItemForm';
 import ItemDetail from './components/ItemDetail';
+import CategoryList from './components/CategoryList';
+import CategoryForm from './components/CategoryForm';
 
 
 function App() {
@@ -87,6 +89,10 @@ function App() {
             <Route path="inventory/items" element={<ItemsList />} />
             <Route path="inventory/items/new" element={<ItemForm />} />
             <Route path="inventory/items/:itemId" element={<ItemDetail />} />
+            <Route path="inventory/items/edit/:itemId" element={<ItemForm />} />
+            <Route path="inventory/categories" element={<CategoryList />} />
+            <Route path="inventory/categories/add" element={<CategoryForm />} />
+            <Route path="inventory/categories/edit/:catId" element={<CategoryForm />} />
 
           </Route>
         </Routes>
