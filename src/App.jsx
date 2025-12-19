@@ -26,6 +26,8 @@ import IncidentTypeForm from './components/IncidentTypeForm';
 import IncidentList from './components/IncidentList';
 import IncidentForm from './components/IncidentForm';
 import IncidentDetail from './components/IncidentDetail';
+import HazardTypeList from './components/HazardTypeList';
+import HazardTypeForm from './components/HazardTypeForm';
 
 
 function App() {
