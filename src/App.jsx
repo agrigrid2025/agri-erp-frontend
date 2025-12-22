@@ -41,6 +41,7 @@ import EquipmentList from './components/EquipmentList';
 import EquipmentForm from './components/EquipmentForm';
 
 
+
 function App() {
   return (
     <AuthProvider>
@@ -110,6 +111,11 @@ function App() {
             <Route path="inventory/suppliers" element={<SuppliersList />} />
             <Route path="inventory/suppliers/add" element={<SupplierForm />} />
             <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />  {/* ← Add this */}
+
+            {/* Inventory - UOM */}
+            <Route path="inventory/uom" element={<UomList />} />
+            <Route path="inventory/uom/add" element={<UomForm />} />
+            <Route path="inventory/uom/edit/:uomId" element={<UomForm />} />
 
             {/* Equipment */}
             <Route path="equipment/list" element={<EquipmentList />} />
