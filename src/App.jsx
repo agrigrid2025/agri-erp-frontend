@@ -103,10 +103,10 @@ function App() {
             <Route path="inventory/warehouses/add" element={<WarehouseForm />} />
             <Route path="inventory/warehouses/edit/:whId" element={<WarehouseForm />} />
 
-            {/* Suppliers */}
-            <Route path="suppliers" element={<SuppliersList />} />
-            <Route path="suppliers/add" element={<SupplierForm />} />
-            <Route path="suppliers/edit/:supId" element={<SupplierForm />} />
+            {/* Inventory - Suppliers */}
+            <Route path="inventory/suppliers" element={<SuppliersList />} />
+            <Route path="inventory/suppliers/add" element={<SupplierForm />} />
+            <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />
 
             {/* Equipment */}
             <Route path="equipment/list" element={<EquipmentList />} />
