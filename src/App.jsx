@@ -37,6 +37,8 @@ import WarehouseList from './components/WarehouseList';
 import WarehouseForm from './components/WarehouseForm';
 import SuppliersList from './components/SuppliersList';
 import SupplierForm from './components/SupplierForm';
+import EquipmentList from './components/EquipmentList';
+import EquipmentForm from './components/EquipmentForm';
 
 
 function App() {
@@ -105,6 +107,12 @@ function App() {
             <Route path="suppliers" element={<SuppliersList />} />
             <Route path="suppliers/add" element={<SupplierForm />} />
             <Route path="suppliers/edit/:supId" element={<SupplierForm />} />
+
+            {/* Equipment */}
+            <Route path="equipment/list" element={<EquipmentList />} />
+            <Route path="equipment/add" element={<EquipmentForm />} />
+            <Route path="equipment/edit/:equipId" element={<EquipmentForm />} />
+          
 
           </Route>
         </Routes>
