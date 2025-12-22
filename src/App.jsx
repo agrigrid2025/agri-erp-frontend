@@ -107,6 +107,9 @@ function App() {
             <Route path="suppliers" element={<SuppliersList />} />
             <Route path="suppliers/add" element={<SupplierForm />} />
             <Route path="suppliers/edit/:supId" element={<SupplierForm />} />
+            <Route path="inventory/suppliers" element={<SuppliersList />} />
+            <Route path="inventory/suppliers/add" element={<SupplierForm />} />
+            <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />  {/* ← Add this */}
 
             {/* Equipment */}
             <Route path="equipment/list" element={<EquipmentList />} />
