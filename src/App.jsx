@@ -45,6 +45,7 @@ import UomForm from './components/UomForm';
 
 
 
+
 function App() {
   return (
     <AuthProvider>
@@ -113,7 +114,12 @@ function App() {
             <Route path="suppliers/edit/:supId" element={<SupplierForm />} />
             <Route path="inventory/suppliers" element={<SuppliersList />} />
             <Route path="inventory/suppliers/add" element={<SupplierForm />} />
-            <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />  {/* ← Add this */}
+            <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />
+            
+            {/* Inventory - Locations */}
+            <Route path="inventory/locations" element={<LocationList />} />
+            <Route path="inventory/locations/add" element={<LocationForm />} />
+            <Route path="inventory/locations/edit/:locId" element={<LocationForm />} />
 
             {/* Inventory - UOM */}
             <Route path="inventory/uom" element={<UomList />} />
