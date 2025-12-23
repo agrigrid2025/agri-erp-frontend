@@ -41,6 +41,8 @@ import EquipmentList from './components/EquipmentList';
 import EquipmentForm from './components/EquipmentForm';
 import UomList from './components/UomList';
 import UomForm from './components/UomForm';
+import LocationList from './components/LocationList';
+import LocationForm from './components/LocationForm';
 
 
 
