@@ -1,4 +1,3 @@
-// src/components/LocationList.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
@@ -62,7 +61,15 @@ export default function LocationList() {
                   <td className="px-6 py-4 text-sm">{loc.code}</td>
                   <td className="px-6 py-4 text-sm">{loc.name || '—'}</td>
                   <td className="px-6 py-4 text-sm">
-                    {loc.is_active ? 'Active' : 'Inactive'}
+                    {loc.is_active ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Inactive
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-sm space-x-4">
                     <Link to={`/dashboard/${tenant}/inventory/locations/edit/${loc.id}`} className="text-blue-600 hover:underline">
