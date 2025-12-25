@@ -28,7 +28,13 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await login(formData.username, formData.password, tenant);
+      const data = await login(formData.username, formData.password, tenant);
+      
+      // ← NEW: Save user data (including role) to localStorage
+      if (data.success && data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
       navigate(`/dashboard/${tenant}`);
     } catch (err) {
       setError('Invalid credentials or inactive account');
