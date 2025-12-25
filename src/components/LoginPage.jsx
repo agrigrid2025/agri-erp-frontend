@@ -28,16 +28,26 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const data = await login(formData.username, formData.password, tenant);
-      
-      // ← NEW: Save user data (including role) to localStorage
-      if (data.success && data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-      }
+      const res = await fetch(`https://${tenant}.agrigrid.net/api/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+        credentials: 'include',
+      });
+      const data = await res.json();
 
-      navigate(`/dashboard/${tenant}`);
+      if (data.success) {
+        // Save user to localStorage
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate(`/dashboard/${tenant}`);
+      } else {
+        setError(data.message || 'Invalid credentials or inactive account');
+      }
     } catch (err) {
-      setError('Invalid credentials or inactive account');
+      setError('Network error — check connection');
     } finally {
       setLoading(false);
     }
