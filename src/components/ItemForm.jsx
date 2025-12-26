@@ -75,22 +75,22 @@ export default function ItemForm() {
             setFormData({
               sku: item.sku,
               name: item.name,
-              description: '',
-              category: '',
-              unit_of_measure: '',
-              default_supplier: '',
-              default_purchase_price: '',
-              default_warehouse: '',
-              reorder_level: item.reorderLevel,
-              min_order_qty: '',
-              has_sds: false,
-              sds_url: '',
-              sds_expiry: '',
-              has_serial: false,
-              has_batch: false,
-              has_whp: false,
-              whp_days: '',
-              notes: '',
+              description: item.description || '',
+              category: item.categoryId || '',
+              unit_of_measure: item.uomId || '',
+              default_supplier: item.defaultSupplierId || '',
+              default_purchase_price: item.defaultPurchasePrice || '',
+              default_warehouse: item.defaultWarehouseId || '',
+              reorder_level: item.reorderLevel || '',
+              min_order_qty: item.minOrderQty || '',
+              has_sds: item.hasSDS || false,
+              sds_url: item.sdsUrl || '',
+              sds_expiry: item.sdsExpiry || '',
+              has_serial: item.hasSerial || false,
+              has_batch: item.hasBatch || false,
+              has_whp: item.hasWHP || false,
+              whp_days: item.whpDays || '',
+              notes: item.notes || '',
               is_active: item.isActive,
             });
           }
@@ -113,11 +113,36 @@ export default function ItemForm() {
     setSaving(true);
     setMessage('');
     try {
-      console.log('Saving item:', formData);
-      setMessage('Item saved successfully! (placeholder)');
-      setTimeout(() => navigate(`/dashboard/${tenant}/inventory/items`), 1500);
+      const url = `https://${tenant}.agrigrid.net/inventory3/api/item/save/`;
+
+      const payload = {
+        ...formData,
+        id: isEdit ? itemId : undefined,
+        default_purchase_price: formData.default_purchase_price || 0,
+        reorder_level: formData.reorder_level || 0,
+        min_order_qty: formData.min_order_qty || 1,
+        whp_days: formData.whp_days || null,
+        category: formData.category || null,
+        unit_of_measure: formData.unit_of_measure || null,
+        default_supplier: formData.default_supplier || null,
+        default_warehouse: formData.default_warehouse || null,
+      };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Item saved successfully!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/inventory/items`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
     } catch (err) {
-      setMessage('Save failed');
+      setMessage('Network error');
     } finally {
       setSaving(false);
     }
