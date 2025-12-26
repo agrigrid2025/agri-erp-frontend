@@ -157,6 +157,17 @@ export default function POForm() {
         {/* Line Items */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Line Items</h2>
+
+          {/* Column Headers */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-800 text-white rounded-t-lg font-medium">
+            <div className="md:col-span-5">Item</div>
+            <div className="md:col-span-1 text-center">UOM</div>
+            <div className="md:col-span-2 text-right">Qty</div>
+            <div className="md:col-span-2 text-right">Price</div>
+            <div className="md:col-span-1 text-right">Line Total</div>
+            <div className="md:col-span-1 text-center">Remove</div>
+          </div>
+
           <div className="space-y-4">
             {poData.lines.map((line, index) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center relative">
@@ -168,7 +179,6 @@ export default function POForm() {
                     onChange={(e) => {
                       const value = e.target.value;
                       updateLine(index, 'itemText', value);
-                      // Filter items
                       if (value.length > 1) {
                         const filtered = items.filter(item =>
                           item.sku.toLowerCase().includes(value.toLowerCase()) ||
