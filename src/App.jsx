@@ -44,6 +44,7 @@ import UomForm from './components/UomForm';
 import LocationList from './components/LocationList';
 import LocationForm from './components/LocationForm';
 import StockList from './components/StockList';
+import POList from './components/POList';
 
 
 
