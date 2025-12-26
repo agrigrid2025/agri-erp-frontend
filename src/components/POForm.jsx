@@ -71,20 +71,37 @@ export default function POForm() {
     }));
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    setMessage('');
-    try {
-      // Placeholder — add real save API when ready
-      console.log('Saving PO:', poData);
-      setMessage('Purchase Order saved successfully! (placeholder)');
+const handleSave = async () => {
+  setSaving(true);
+  setMessage('');
+  try {
+    const url = `https://${tenant}.agrigrid.net/inventory3/api/po/save/`;
+
+    const payload = {
+      ...poData,
+      id: isEdit ? poId : undefined,
+      lines: poData.lines.filter(line => line.item),  // Only send lines with item
+    };
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (data.success) {
+      setMessage('Purchase Order saved successfully!');
       setTimeout(() => navigate(`/dashboard/${tenant}/inventory/po`), 1500);
-    } catch (err) {
-      setMessage('Save failed');
-    } finally {
-      setSaving(false);
+    } else {
+      setMessage(data.error || 'Save failed');
     }
-  };
+  } catch (err) {
+    setMessage('Network error');
+  } finally {
+    setSaving(false);
+  }
+};
 
   const grandTotal = poData.lines.reduce((sum, line) => sum + line.total, 0);
 
