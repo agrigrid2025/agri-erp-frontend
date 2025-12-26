@@ -43,6 +43,7 @@ import UomList from './components/UomList';
 import UomForm from './components/UomForm';
 import LocationList from './components/LocationList';
 import LocationForm from './components/LocationForm';
+import StockList from './components/StockList';
 
 
 
@@ -109,6 +110,7 @@ function App() {
             <Route path="inventory/warehouses" element={<WarehouseList />} />
             <Route path="inventory/warehouses/add" element={<WarehouseForm />} />
             <Route path="inventory/warehouses/edit/:whId" element={<WarehouseForm />} />
+            <Route path="inventory/stock" element={<StockList />} />
 
             {/* Inventory - Suppliers */}
             <Route path="suppliers" element={<SuppliersList />} />
