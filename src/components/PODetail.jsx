@@ -7,11 +7,10 @@ export default function PODetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`https://${tenant}.agrigrid.net/inventory3/api/pos/`, { credentials: 'include' })
+    fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        const foundPo = data.pos.find(p => p.id === parseInt(poId));
-        setPo(foundPo);
+        setPo(data.po);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -98,11 +97,38 @@ export default function PODetail() {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {/* Placeholder — full lines will come from API */}
-            <tr>
-              <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                Line items coming soon...
-              </td>
-            </tr>
+            <table className="min-w-full">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-6 py-3 text-left">Item</th>
+                  <th className="px-6 py-3 text-right">Ordered</th>
+                  <th className="px-6 py-3 text-right">Received</th>
+                  <th className="px-6 py-3 text-right">Price</th>
+                  <th className="px-6 py-3 text-right">Line Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {po.lines.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                      No line items
+                    </td>
+                  </tr>
+                ) : (
+                  po.lines.map(line => (
+                    <tr key={line.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <span className="font-medium">{line.item.sku}</span> — {line.item.name}
+                      </td>
+                      <td className="px-6 py-4 text-right">{line.ordered_qty.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-right text-green-600 font-bold">{line.received_qty.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-right font-mono">${line.unit_price_ex_gst.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-right font-mono font-bold">${line.total_price.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </tbody>
         </table>
       </div>
