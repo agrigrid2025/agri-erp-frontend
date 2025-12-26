@@ -159,17 +159,52 @@ export default function POForm() {
           <h2 className="text-2xl font-bold mb-4">Line Items</h2>
           <div className="space-y-4">
             {poData.lines.map((line, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
+              <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center relative">
                 {/* Item Search */}
                 <div className="md:col-span-5 relative">
                   <input
                     type="text"
                     value={line.itemText}
-                    onChange={(e) => updateLine(index, 'itemText', e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateLine(index, 'itemText', value);
+                      // Filter items
+                      if (value.length > 1) {
+                        const filtered = items.filter(item =>
+                          item.sku.toLowerCase().includes(value.toLowerCase()) ||
+                          item.name.toLowerCase().includes(value.toLowerCase())
+                        );
+                        updateLine(index, 'searchResults', filtered.slice(0, 10));
+                      } else {
+                        updateLine(index, 'searchResults', []);
+                      }
+                    }}
                     placeholder="Search item by SKU or name..."
-                    className="w-full px-4 py-3 pr-12 border rounded-lg"
+                    className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
                   />
-                  {/* Dropdown results would go here */}
+                  <svg className="absolute right-3 top-4 w-6 h-6 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+
+                  {/* Search Results Dropdown */}
+                  {line.searchResults && line.searchResults.length > 0 && (
+                    <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+                      {line.searchResults.map(item => (
+                        <div
+                          key={item.id}
+                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                          onClick={() => {
+                            updateLine(index, 'item', item.id);
+                            updateLine(index, 'itemText', `${item.sku} - ${item.name}`);
+                            updateLine(index, 'uom', item.uom);
+                            updateLine(index, 'searchResults', []);
+                          }}
+                        >
+                          {item.sku} - {item.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* UOM */}
@@ -225,7 +260,7 @@ export default function POForm() {
             <button
               type="button"
               onClick={addLine}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
+              className="mt-4 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition"
             >
               + Add Line
             </button>
