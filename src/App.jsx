@@ -144,6 +144,7 @@ function App() {
             <Route path="inventory/po/new" element={<POForm />} />
             <Route path="inventory/po/:poId" element={<PODetail />} />
             <Route path="inventory/po/:poId/receipt" element={<ReceiptForm />} />
+            <Route path="inventory/po/edit/:poId" element={<POForm />} />
           
 
           </Route>

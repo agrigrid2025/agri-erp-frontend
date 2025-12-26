@@ -12,7 +12,8 @@ export default function POList() {
       .then(data => {
         setPos(data.pos || []);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [tenant]);
 
   const getStatusBadge = (status) => {
@@ -29,14 +30,17 @@ export default function POList() {
     </span>;
   };
 
-  if (loading) return <div className="text-center py-20">Loading POs...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading purchase orders...</div>;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="bg-white rounded-xl shadow-lg p-8">
+      <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Purchase Orders</h1>
-          <Link to={`/dashboard/${tenant}/inventory/po/new`} className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+          <Link
+            to={`/dashboard/${tenant}/inventory/po/new`}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition"
+          >
             + New PO
           </Link>
         </div>
@@ -55,15 +59,18 @@ export default function POList() {
           <tbody className="divide-y divide-gray-200">
             {pos.length === 0 ? (
               <tr>
-                <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="6" className="px-6 py-12 text-center text-gray-500 text-lg">
                   No purchase orders yet
                 </td>
               </tr>
             ) : (
               pos.map(po => (
                 <tr key={po.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-mono font-medium">
-                    <Link to={`/dashboard/${tenant}/inventory/po/${po.id}`} className="text-indigo-600 hover:text-indigo-800">
+                  <td className="px-6 py-4">
+                    <Link
+                      to={`/dashboard/${tenant}/inventory/po/${po.id}`}
+                      className="font-mono text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
                       {po.po_number}
                     </Link>
                   </td>
@@ -72,11 +79,17 @@ export default function POList() {
                   <td className="px-6 py-4 text-center">{getStatusBadge(po.status)}</td>
                   <td className="px-6 py-4 text-right font-mono">${po.total_value.toFixed(2)}</td>
                   <td className="px-6 py-4 text-center space-x-4">
-                    <Link to={`/dashboard/${tenant}/inventory/po/${po.id}`} className="text-indigo-600 hover:text-indigo-800">
+                    <Link
+                      to={`/dashboard/${tenant}/inventory/po/${po.id}`}
+                      className="text-indigo-600 hover:text-indigo-800"
+                    >
                       View
                     </Link>
                     {po.status !== 'received' && po.status !== 'cancelled' && (
-                      <Link to={`/dashboard/${tenant}/inventory/po/${po.id}/receipt`} className="text-green-600 hover:text-green-800">
+                      <Link
+                        to={`/dashboard/${tenant}/inventory/po/${po.id}/receipt`}
+                        className="text-green-600 hover:text-green-800 font-medium"
+                      >
                         Receipt
                       </Link>
                     )}
