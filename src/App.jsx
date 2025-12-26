@@ -134,6 +134,12 @@ function App() {
             <Route path="equipment/list" element={<EquipmentList />} />
             <Route path="equipment/add" element={<EquipmentForm />} />
             <Route path="equipment/edit/:equipId" element={<EquipmentForm />} />
+
+            {/* Purchase Orders */}
+            <Route path="inventory/po" element={<POList />} />
+            <Route path="inventory/po/new" element={<POForm />} />
+            <Route path="inventory/po/:poId" element={<PODetail />} />
+            <Route path="inventory/po/:poId/receipt" element={<ReceiptForm />} />
           
 
           </Route>
