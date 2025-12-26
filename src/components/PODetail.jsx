@@ -86,15 +86,7 @@ export default function PODetail() {
           <h2 className="text-xl font-bold">Line Items</h2>
         </div>
         <table className="min-w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-6 py-3 text-left">Item</th>
-              <th className="px-6 py-3 text-right">Ordered</th>
-              <th className="px-6 py-3 text-right">Received</th>
-              <th className="px-6 py-3 text-right">Price</th>
-              <th className="px-6 py-3 text-right">Line Total</th>
-            </tr>
-          </thead>
+
           <tbody className="divide-y divide-gray-200">
             {/* Placeholder — full lines will come from API */}
             <table className="min-w-full">
