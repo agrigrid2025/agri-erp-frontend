@@ -29,6 +29,7 @@ export default function ItemForm() {
     notes: '',
     is_active: true,
   });
+
   const [categories, setCategories] = useState([]);
   const [uoms, setUoms] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -38,15 +39,34 @@ export default function ItemForm() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Load dropdown data (you can create separate APIs or fetch from one endpoint)
-    // For now, placeholder — in real app, fetch categories, UOMs, suppliers, warehouses
-    setCategories([]); // Replace with real fetch
-    setUoms([]);
-    setSuppliers([]);
-    setWarehouses([]);
+    const fetchDropdowns = async () => {
+      try {
+        const [catRes, uomRes, supRes, whRes] = await Promise.all([
+          fetch(`https://${tenant}.agrigrid.net/inventory3/api/categories/`, { credentials: 'include' }),
+          fetch(`https://${tenant}.agrigrid.net/inventory3/api/uoms/`, { credentials: 'include' }),
+          fetch(`https://${tenant}.agrigrid.net/suppliers/api/suppliers/`, { credentials: 'include' }),
+          fetch(`https://${tenant}.agrigrid.net/inventory3/api/warehouses/`, { credentials: 'include' }),
+        ]);
+
+        const [catData, uomData, supData, whData] = await Promise.all([
+          catRes.json(),
+          uomRes.json(),
+          supRes.json(),
+          whRes.json(),
+        ]);
+
+        setCategories(catData.categories || []);
+        setUoms(uomData.uoms || []);
+        setSuppliers(supData.suppliers || []);
+        setWarehouses(whData.warehouses || []);
+      } catch (err) {
+        console.error('Failed to load dropdowns', err);
+      }
+    };
+
+    fetchDropdowns();
 
     if (isEdit && itemId) {
-      // Load existing item
       fetch(`https://${tenant}.agrigrid.net/inventory3/api/items/`, { credentials: 'include' })
         .then(r => r.json())
         .then(data => {
@@ -93,7 +113,6 @@ export default function ItemForm() {
     setSaving(true);
     setMessage('');
     try {
-      // Placeholder — add real save endpoint when ready
       console.log('Saving item:', formData);
       setMessage('Item saved successfully! (placeholder)');
       setTimeout(() => navigate(`/dashboard/${tenant}/inventory/items`), 1500);
@@ -174,7 +193,9 @@ export default function ItemForm() {
             >
               <option value="">Select UOM</option>
               {uoms.map(uom => (
-                <option key={uom.id} value={uom.id}>{uom.abbreviation}</option>
+                <option key={uom.id} value={uom.id}>
+                  {uom.name} ({uom.abbreviation})
+                </option>
               ))}
             </select>
           </div>
@@ -218,7 +239,7 @@ export default function ItemForm() {
           >
             <option value="">Select warehouse</option>
             {warehouses.map(wh => (
-              <option key={wh.id} value={wh.id}>{wh.name}</option>
+              <option key={wh.id} value={wh.id}>{wh.name} ({wh.code})</option>
             ))}
           </select>
         </div>
