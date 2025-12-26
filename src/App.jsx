@@ -45,6 +45,9 @@ import LocationList from './components/LocationList';
 import LocationForm from './components/LocationForm';
 import StockList from './components/StockList';
 import POList from './components/POList';
+import POForm from './components/POForm';
+import PODetail from './components/PODetail';
+import ReceiptForm from './components/ReceiptForm';
 
 
 
