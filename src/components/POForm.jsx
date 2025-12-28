@@ -34,8 +34,33 @@ export default function POForm() {
       .then(data => setItems(data.items || []));
 
     if (isEdit && poId) {
-      // Load existing PO (add API when ready)
-      setLoading(false);
+      // Load existing PO
+      fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => {
+          const p = data.po;
+          if (p) {
+            setPoData({
+              supplier: p.supplier_id || '',
+              order_date: p.order_date,
+              expected_date: p.expected_date || '',
+              status: p.status,
+              notes: p.notes || '',
+              lines: p.lines.map(line => ({
+                id: line.id,
+                item: line.item.id,
+                itemText: `${line.item.sku} - ${line.item.name}`,
+                uom: line.item.uom,
+                qty: line.ordered_qty,
+                price: line.unit_price_ex_gst,
+                total: line.total_price,
+                searchResults: [],
+              })),
+            });
+          }
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -49,18 +74,28 @@ export default function POForm() {
   const addLine = () => {
     setPoData(prev => ({
       ...prev,
-      lines: [...prev.lines, { item: null, itemText: '', uom: '', qty: '', price: '', total: 0 }],
+      lines: [...prev.lines, {
+        item: null,
+        itemText: '',
+        uom: '',
+        qty: '',
+        price: '',
+        total: 0,
+        searchResults: [],
+      }],
     }));
   };
 
   const updateLine = (index, field, value) => {
     const newLines = [...poData.lines];
     newLines[index][field] = value;
+
     if (field === 'qty' || field === 'price') {
       const qty = parseFloat(newLines[index].qty) || 0;
       const price = parseFloat(newLines[index].price) || 0;
       newLines[index].total = qty * price;
     }
+
     setPoData(prev => ({ ...prev, lines: newLines }));
   };
 
@@ -71,37 +106,42 @@ export default function POForm() {
     }));
   };
 
-const handleSave = async () => {
-  setSaving(true);
-  setMessage('');
-  try {
-    const url = `https://${tenant}.agrigrid.net/inventory3/api/po/save/`;
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage('');
+    try {
+      const url = `https://${tenant}.agrigrid.net/inventory3/api/po/save/`;
 
-    const payload = {
-      ...poData,
-      id: isEdit ? poId : undefined,
-      lines: poData.lines.filter(line => line.item),  // Only send lines with item
-    };
+      const payload = {
+        ...poData,
+        id: isEdit ? poId : undefined,
+        lines: poData.lines.filter(line => line.item).map(line => ({
+          id: line.id,
+          item: line.item,
+          qty: line.qty,
+          price: line.price,
+        })),
+      };
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      credentials: 'include',
-    });
-    const data = await res.json();
-    if (data.success) {
-      setMessage('Purchase Order saved successfully!');
-      setTimeout(() => navigate(`/dashboard/${tenant}/inventory/po`), 1500);
-    } else {
-      setMessage(data.error || 'Save failed');
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Purchase Order saved successfully!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/inventory/po`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
+    } catch (err) {
+      setMessage('Network error');
+    } finally {
+      setSaving(false);
     }
-  } catch (err) {
-    setMessage('Network error');
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   const grandTotal = poData.lines.reduce((sum, line) => sum + line.total, 0);
 
@@ -213,7 +253,7 @@ const handleSave = async () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                   </svg>
 
-                  {/* Search Results Dropdown */}
+                  {/* Search Results */}
                   {line.searchResults && line.searchResults.length > 0 && (
                     <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
                       {line.searchResults.map(item => (
