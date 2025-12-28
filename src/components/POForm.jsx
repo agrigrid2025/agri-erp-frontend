@@ -35,7 +35,6 @@ export default function POForm() {
       .then(data => setItems(data.items || []));
 
     if (isEdit && poId) {
-      // Load existing PO for edit
       fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' })
         .then(r => r.json())
         .then(data => {
@@ -62,8 +61,6 @@ export default function POForm() {
           setLoading(false);
         })
         .catch(() => setLoading(false));
-    } else {
-      setLoading(false);
     }
   }, [isEdit, poId, tenant]);
 
