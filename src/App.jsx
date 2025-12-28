@@ -48,6 +48,8 @@ import POList from './components/POList';
 import POForm from './components/POForm';
 import PODetail from './components/PODetail';
 import ReceiptForm from './components/ReceiptForm';
+import ReceiptList from './components/ReceiptList';
+import ReceiptDetail from './components/ReceiptDetail';
 
 
 
@@ -145,6 +147,10 @@ function App() {
             <Route path="inventory/po/:poId" element={<PODetail />} />
             <Route path="inventory/po/:poId/receipt" element={<ReceiptForm />} />
             <Route path="inventory/po/edit/:poId" element={<POForm />} />
+
+            {/* Purchase Receipts */}
+            <Route path="inventory/receipts" element={<ReceiptList />} />
+            <Route path="inventory/receipt/:receiptId" element={<ReceiptDetail />} />
           
 
           </Route>
