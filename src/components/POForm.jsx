@@ -149,6 +149,8 @@ export default function POForm() {
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
 
+  const currentSupplier = suppliers.find(sup => sup.id === parseInt(poData.supplier_id));
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">
@@ -160,18 +162,24 @@ export default function POForm() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
-            <select
-              name="supplier_id"
-              value={poData.supplier_id}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">Select supplier</option>
-              {suppliers.map(sup => (
-                <option key={sup.id} value={sup.id}>{sup.name}</option>
-              ))}
-            </select>
+            {isEdit ? (
+              <div className="w-full px-4 py-3 bg-gray-100 rounded-lg text-lg font-medium">
+                {currentSupplier ? currentSupplier.name : 'Loading...'}
+              </div>
+            ) : (
+              <select
+                name="supplier_id"
+                value={poData.supplier_id}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              >
+                <option value="">Select supplier</option>
+                {suppliers.map(sup => (
+                  <option key={sup.id} value={sup.id}>{sup.name}</option>
+                ))}
+              </select>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Order Date *</label>
