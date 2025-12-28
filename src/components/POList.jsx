@@ -67,12 +67,14 @@ export default function POList() {
               pos.map(po => (
                 <tr key={po.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
-                    <Link
-                      to={`/dashboard/${tenant}/inventory/po/${po.id}`}
-                      className="font-mono text-indigo-600 hover:text-indigo-800 font-medium"
-                    >
-                      {po.po_number}
-                    </Link>
+                    <td className="px-6 py-4">
+                      <Link
+                        to={`/dashboard/${tenant}/inventory/po/edit/${po.id}`}
+                        className="font-mono text-indigo-600 hover:text-indigo-800 font-medium"
+                      >
+                        {po.po_number}
+                      </Link>
+                    </td>
                   </td>
                   <td className="px-6 py-4">{po.supplier}</td>
                   <td className="px-6 py-4">{new Date(po.order_date).toLocaleDateString()}</td>
