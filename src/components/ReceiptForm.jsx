@@ -95,7 +95,7 @@ export default function ReceiptForm() {
       setSaving(false);
     }
   };
-  };
+  
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading receipt...</div>;
 
