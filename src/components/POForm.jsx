@@ -9,13 +9,14 @@ export default function POForm() {
   const poId = isEdit ? location.pathname.split('/').pop() : null;
 
   const [poData, setPoData] = useState({
-    supplier: '',
+    supplier_id: '',
     order_date: new Date().toISOString().split('T')[0],
     expected_date: '',
     status: 'draft',
     notes: '',
     lines: [],
   });
+
   const [suppliers, setSuppliers] = useState([]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +35,14 @@ export default function POForm() {
       .then(data => setItems(data.items || []));
 
     if (isEdit && poId) {
-      // Load existing PO
+      // Load existing PO for edit
       fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' })
         .then(r => r.json())
         .then(data => {
           const p = data.po;
           if (p) {
             setPoData({
-              supplier: p.supplier_id || '',
+              supplier_id: p.supplier_id || '',
               order_date: p.order_date,
               expected_date: p.expected_date || '',
               status: p.status,
@@ -115,6 +116,7 @@ export default function POForm() {
       const payload = {
         ...poData,
         id: isEdit ? poId : undefined,
+        supplier: poData.supplier_id,
         lines: poData.lines.filter(line => line.item).map(line => ({
           id: line.id,
           item: line.item,
@@ -159,8 +161,8 @@ export default function POForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
             <select
-              name="supplier"
-              value={poData.supplier}
+              name="supplier_id"
+              value={poData.supplier_id}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
