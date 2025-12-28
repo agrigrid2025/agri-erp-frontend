@@ -22,23 +22,34 @@ export default function POForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Load suppliers
-    fetch(`https://${tenant}.agrigrid.net/suppliers/api/suppliers/`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(data => setSuppliers(data.suppliers || []));
+    const loadData = async () => {
+      try {
+        // Load suppliers and items in parallel
+        const [supRes, itemRes] = await Promise.all([
+          fetch(`https://${tenant}.agrigrid.net/suppliers/api/suppliers/`, { credentials: 'include' }),
+          fetch(`https://${tenant}.agrigrid.net/inventory3/api/items/`, { credentials: 'include' }),
+        ]);
 
-    // Load items for search
-    fetch(`https://${tenant}.agrigrid.net/inventory3/api/items/`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(data => setItems(data.items || []));
+        if (!supRes.ok || !itemRes.ok) throw new Error('Failed to load dropdowns');
 
-    if (isEdit && poId) {
-      fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' })
-        .then(r => r.json())
-        .then(data => {
-          const p = data.po;
+        const [supData, itemData] = await Promise.all([
+          supRes.json(),
+          itemRes.json(),
+        ]);
+
+        setSuppliers(supData.suppliers || []);
+        setItems(itemData.items || []);
+
+        // Load PO if editing
+        if (isEdit && poId) {
+          const poRes = await fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' });
+          if (!poRes.ok) throw new Error('Failed to load PO');
+
+          const poJson = await poRes.json();
+          const p = poJson.po;
           if (p) {
             setPoData({
               supplier_id: p.supplier_id || '',
@@ -46,7 +57,7 @@ export default function POForm() {
               expected_date: p.expected_date || '',
               status: p.status,
               notes: p.notes || '',
-              lines: p.lines.map(line => ({
+              lines: (p.lines || []).map(line => ({
                 id: line.id,
                 item: line.item.id,
                 itemText: `${line.item.sku} - ${line.item.name}`,
@@ -58,10 +69,16 @@ export default function POForm() {
               })),
             });
           }
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    }
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load form data. Please refresh.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [isEdit, poId, tenant]);
 
   const handleChange = (e) => {
@@ -107,6 +124,7 @@ export default function POForm() {
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
+    setError('');
     try {
       const url = `https://${tenant}.agrigrid.net/inventory3/api/po/save/`;
 
@@ -145,6 +163,7 @@ export default function POForm() {
   const grandTotal = poData.lines.reduce((sum, line) => sum + line.total, 0);
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
+  if (error) return <div className="text-center py-20 text-2xl text-red-600">{error}</div>;
 
   const currentSupplier = suppliers.find(sup => sup.id === parseInt(poData.supplier_id));
 
@@ -161,7 +180,7 @@ export default function POForm() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
             {isEdit ? (
               <div className="w-full px-4 py-3 bg-gray-100 rounded-lg text-lg font-medium">
-                {currentSupplier ? currentSupplier.name : 'Loading...'}
+                {currentSupplier ? currentSupplier.name : '—'}
               </div>
             ) : (
               <select
@@ -233,102 +252,108 @@ export default function POForm() {
           </div>
 
           <div className="space-y-4">
-            {poData.lines.map((line, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center relative">
-                {/* Item Search */}
-                <div className="md:col-span-5 relative">
-                  <input
-                    type="text"
-                    value={line.itemText}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      updateLine(index, 'itemText', value);
-                      if (value.length > 1) {
-                        const filtered = items.filter(item =>
-                          item.sku.toLowerCase().includes(value.toLowerCase()) ||
-                          item.name.toLowerCase().includes(value.toLowerCase())
-                        );
-                        updateLine(index, 'searchResults', filtered.slice(0, 10));
-                      } else {
-                        updateLine(index, 'searchResults', []);
-                      }
-                    }}
-                    placeholder="Search item by SKU or name..."
-                    className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
-                  />
-                  <svg className="absolute right-3 top-4 w-6 h-6 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                  </svg>
+            {poData.lines.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No line items
+              </div>
+            ) : (
+              poData.lines.map((line, index) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center relative">
+                  {/* Item Search */}
+                  <div className="md:col-span-5 relative">
+                    <input
+                      type="text"
+                      value={line.itemText}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        updateLine(index, 'itemText', value);
+                        if (value.length > 1) {
+                          const filtered = items.filter(item =>
+                            item.sku.toLowerCase().includes(value.toLowerCase()) ||
+                            item.name.toLowerCase().includes(value.toLowerCase())
+                          );
+                          updateLine(index, 'searchResults', filtered.slice(0, 10));
+                        } else {
+                          updateLine(index, 'searchResults', []);
+                        }
+                      }}
+                      placeholder="Search item by SKU or name..."
+                      className="w-full px-4 py-3 pr-12 border rounded-lg text-lg"
+                    />
+                    <svg className="absolute right-3 top-4 w-6 h-6 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
 
-                  {/* Search Results */}
-                  {line.searchResults && line.searchResults.length > 0 && (
-                    <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
-                      {line.searchResults.map(item => (
-                        <div
-                          key={item.id}
-                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
-                          onClick={() => {
-                            updateLine(index, 'item', item.id);
-                            updateLine(index, 'itemText', `${item.sku} - ${item.name}`);
-                            updateLine(index, 'uom', item.uom);
-                            updateLine(index, 'searchResults', []);
-                          }}
-                        >
-                          {item.sku} - {item.name}
-                        </div>
-                      ))}
+                    {/* Search Results */}
+                    {line.searchResults && line.searchResults.length > 0 && (
+                      <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+                        {line.searchResults.map(item => (
+                          <div
+                            key={item.id}
+                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer"
+                            onClick={() => {
+                              updateLine(index, 'item', item.id);
+                              updateLine(index, 'itemText', `${item.sku} - ${item.name}`);
+                              updateLine(index, 'uom', item.uom);
+                              updateLine(index, 'searchResults', []);
+                            }}
+                          >
+                            {item.sku} - {item.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* UOM */}
+                  <div className="md:col-span-1">
+                    <div className="px-4 py-3 bg-gray-100 rounded-lg text-center font-medium">
+                      {line.uom || '—'}
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* UOM */}
-                <div className="md:col-span-1">
-                  <div className="px-4 py-3 bg-gray-100 rounded-lg text-center font-medium">
-                    {line.uom || '—'}
+                  {/* Qty */}
+                  <div className="md:col-span-2">
+                    <input
+                      type="number"
+                      value={line.qty}
+                      onChange={(e) => updateLine(index, 'qty', e.target.value)}
+                      step="0.01"
+                      className="w-full px-4 py-3 border rounded-lg text-right"
+                      required
+                    />
+                  </div>
+
+                  {/* Price */}
+                  <div className="md:col-span-2">
+                    <input
+                      type="number"
+                      value={line.price}
+                      onChange={(e) => updateLine(index, 'price', e.target.value)}
+                      step="0.01"
+                      className="w-full px-4 py-3 border rounded-lg text-right font-mono"
+                      required
+                    />
+                  </div>
+
+                  {/* Line Total */}
+                  <div className="md:col-span-1 text-right font-bold text-lg font-mono">
+                    ${line.total.toFixed(2)}
+                  </div>
+
+                  {/* Remove */}
+                  <div className="md:col-span-1 text-center">
+                    <button
+                      type="button"
+                      onClick={() => removeLine(index)}
+                      className="text-red-600 hover:text-red-800 font-bold"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
-
-                {/* Qty */}
-                <div className="md:col-span-2">
-                  <input
-                    type="number"
-                    value={line.qty}
-                    onChange={(e) => updateLine(index, 'qty', e.target.value)}
-                    step="0.01"
-                    className="w-full px-4 py-3 border rounded-lg text-right"
-                    required
-                  />
-                </div>
-
-                {/* Price */}
-                <div className="md:col-span-2">
-                  <input
-                    type="number"
-                    value={line.price}
-                    onChange={(e) => updateLine(index, 'price', e.target.value)}
-                    step="0.01"
-                    className="w-full px-4 py-3 border rounded-lg text-right font-mono"
-                    required
-                  />
-                </div>
-
-                {/* Line Total */}
-                <div className="md:col-span-1 text-right font-bold text-lg font-mono">
-                  ${line.total.toFixed(2)}
-                </div>
-
-                {/* Remove */}
-                <div className="md:col-span-1 text-center">
-                  <button
-                    type="button"
-                    onClick={() => removeLine(index)}
-                    className="text-red-600 hover:text-red-800 font-bold"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
 
             {/* Add Line Button */}
             <button
