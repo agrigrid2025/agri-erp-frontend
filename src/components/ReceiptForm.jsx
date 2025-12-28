@@ -59,15 +59,42 @@ export default function ReceiptForm() {
     setSaving(true);
     setMessage('');
     try {
-      // Placeholder — add real save API when ready
-      console.log('Saving receipt:', { receiptData, lines });
-      setMessage('Receipt saved successfully! (placeholder)');
-      setTimeout(() => navigate(`/dashboard/${tenant}/inventory/po/${poId}`), 1500);
+      const url = `https://${tenant}.agrigrid.net/inventory3/api/receipt/save/`;
+
+      const payload = {
+        ...receiptData,
+        id: isEdit ? receiptId : undefined,
+        po: po.id,
+        lines: lines.map(line => ({
+          id: line.id,
+          item: line.item,
+          ordered_qty: line.ordered_qty,
+          received_qty: line.received_qty,
+          batch_number: line.batch_number || '',
+          serial_number: line.serial_number || '',
+          expiry_date: line.expiry_date || null,
+        })),
+      };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Receipt saved successfully!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/inventory/receipts`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
     } catch (err) {
-      setMessage('Save failed');
+      setMessage('Network error');
     } finally {
       setSaving(false);
     }
+  };
   };
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading receipt...</div>;
