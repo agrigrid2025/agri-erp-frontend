@@ -21,38 +21,57 @@ export default function ReceiptForm() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Load PO and lines (replace with real API when ready)
-    // For now, placeholder data
-    setPo({
-      po_number: 'PO-000001',
-      supplier: 'Example Supplier',
-    });
-    setLines([
-      { id: 1, item: 'ABC123 - Fertilizer 25kg', uom: 'bag', ordered_qty: 100, received_qty: 0 },
-      { id: 2, item: 'XYZ456 - Pesticide 5L', uom: 'L', ordered_qty: 50, received_qty: 0 },
-    ]);
+    const loadData = async () => {
+      try {
+        // Load PO with lines
+        const poRes = await fetch(`https://${tenant}.agrigrid.net/inventory3/api/po/${poId}/`, { credentials: 'include' });
+        if (!poRes.ok) throw new Error('Failed to load PO');
+        const poJson = await poRes.json();
+        const p = poJson.po;
+        setPo(p);
 
-    // Load warehouses and locations
-    fetch(`https://${tenant}.agrigrid.net/inventory3/api/warehouses/`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(data => setWarehouses(data.warehouses || []));
+        // Map PO lines for receipt
+        setLines(p.lines.map(line => ({
+          id: line.id,
+          item: line.item.id,
+          itemText: `${line.item.sku} - ${line.item.name}`,
+          uom: line.item.uom,
+          ordered_qty: line.ordered_qty,
+          received_qty: line.received_qty || 0,  // existing received
+          batch_number: '',
+          serial_number: '',
+          expiry_date: '',
+        })));
 
-    fetch(`https://${tenant}.agrigrid.net/inventory3/api/locations/`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(data => setLocations(data.locations || []));
+        // Load warehouses and locations
+        const [whRes, locRes] = await Promise.all([
+          fetch(`https://${tenant}.agrigrid.net/inventory3/api/warehouses/`, { credentials: 'include' }),
+          fetch(`https://${tenant}.agrigrid.net/inventory3/api/locations/`, { credentials: 'include' }),
+        ]);
 
-    setLoading(false);
-  }, [tenant]);
+        const [whData, locData] = await Promise.all([whRes.json(), locRes.json()]);
+        setWarehouses(whData.warehouses || []);
+        setLocations(locData.locations || []);
+      } catch (err) {
+        console.error(err);
+        setMessage('Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [tenant, poId]);
+
+  const handleReceiptChange = (e) => {
+    const { name, value } = e.target;
+    setReceiptData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleLineChange = (index, field, value) => {
     const newLines = [...lines];
     newLines[index][field] = value;
     setLines(newLines);
-  };
-
-  const handleReceiptChange = (e) => {
-    const { name, value } = e.target;
-    setReceiptData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
@@ -62,13 +81,11 @@ export default function ReceiptForm() {
       const url = `https://${tenant}.agrigrid.net/inventory3/api/receipt/save/`;
 
       const payload = {
+        po: poId,
         ...receiptData,
-        id: isEdit ? receiptId : undefined,
-        po: po.id,
         lines: lines.map(line => ({
-          id: line.id,
+          po_line_id: line.id,
           item: line.item,
-          ordered_qty: line.ordered_qty,
           received_qty: line.received_qty,
           batch_number: line.batch_number || '',
           serial_number: line.serial_number || '',
@@ -95,14 +112,13 @@ export default function ReceiptForm() {
       setSaving(false);
     }
   };
-  
 
-  if (loading) return <div className="text-center py-20 text-2xl">Loading receipt...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading receipt form...</div>;
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Receive Purchase Order {po?.po_number}</h1>
-      <p className="text-xl text-gray-600 mb-8">Supplier: {po?.supplier}</p>
+      <h1 className="text-3xl font-bold mb-8">Receive Purchase Order {po?.po_number || poId}</h1>
+      <p className="text-xl text-gray-600 mb-8">Supplier: {po?.supplier || 'Loading...'}</p>
 
       <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
         {/* Receipt Header */}
@@ -143,7 +159,9 @@ export default function ReceiptForm() {
             >
               <option value="">Select location</option>
               {locations.map(loc => (
-                <option key={loc.id} value={loc.id}>{loc.warehouse__name} — {loc.code} {loc.name ? `(${loc.name})` : ''}</option>
+                <option key={loc.id} value={loc.id}>
+                  {loc.warehouse__name} — {loc.code} {loc.name ? `(${loc.name})` : ''}
+                </option>
               ))}
             </select>
           </div>
@@ -174,47 +192,58 @@ export default function ReceiptForm() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {lines.map((line, index) => (
-                <tr key={line.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{line.item} ({line.uom})</td>
-                  <td className="px-6 py-4 text-right">{line.ordered_qty}</td>
-                  <td className="px-6 py-4 text-right">
-                    <input
-                      type="number"
-                      value={line.received_qty}
-                      onChange={(e) => handleLineChange(index, 'received_qty', e.target.value)}
-                      min="0"
-                      max={line.ordered_qty}
-                      step="0.01"
-                      className="w-32 px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <input
-                      type="text"
-                      value={line.batch_number || ''}
-                      onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
-                      placeholder="Batch"
-                      className="w-32 px-3 py-2 border rounded text-center"
-                    />
-                    <input
-                      type="text"
-                      value={line.serial_number || ''}
-                      onChange={(e) => handleLineChange(index, 'serial_number', e.target.value)}
-                      placeholder="Serial"
-                      className="w-32 px-3 py-2 border rounded text-center mt-2"
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <input
-                      type="date"
-                      value={line.expiry_date || ''}
-                      onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
-                      className="w-40 px-3 py-2 border rounded"
-                    />
+              {lines.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                    No items on this PO
                   </td>
                 </tr>
-              ))}
+              ) : (
+                lines.map((line, index) => (
+                  <tr key={line.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      {line.itemText} ({line.uom})
+                    </td>
+                    <td className="px-6 py-4 text-right">{line.ordered_qty.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right">
+                      <input
+                        type="number"
+                        value={line.received_qty}
+                        onChange={(e) => handleLineChange(index, 'received_qty', e.target.value)}
+                        min="0"
+                        max={line.ordered_qty}
+                        step="0.01"
+                        className="w-32 px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
+                        required
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <input
+                        type="text"
+                        value={line.batch_number}
+                        onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
+                        placeholder="Batch"
+                        className="w-32 px-3 py-2 border rounded text-center"
+                      />
+                      <input
+                        type="text"
+                        value={line.serial_number}
+                        onChange={(e) => handleLineChange(index, 'serial_number', e.target.value)}
+                        placeholder="Serial"
+                        className="w-32 px-3 py-2 border rounded text-center mt-2"
+                      />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <input
+                        type="date"
+                        value={line.expiry_date}
+                        onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
+                        className="w-40 px-3 py-2 border rounded"
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
