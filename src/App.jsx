@@ -51,10 +51,6 @@ import ReceiptForm from './components/ReceiptForm';
 import ReceiptList from './components/ReceiptList';
 import ReceiptDetail from './components/ReceiptDetail';
 
-
-
-
-
 function App() {
   return (
     <AuthProvider>
