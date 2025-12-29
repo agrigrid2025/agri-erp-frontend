@@ -37,7 +37,9 @@ export default function ReceiptForm() {
           itemText: `${line.item.sku} - ${line.item.name}`,
           uom: line.item.uom,
           ordered_qty: line.ordered_qty,
-          received_qty: line.received_qty || 0,  // existing received
+          received_qty: 0,
+          unit_price: line.unit_price_ex_gst,  // Pre-populate from PO
+          line_total: 0,
           batch_number: '',
           serial_number: '',
           expiry_date: '',
@@ -71,6 +73,13 @@ export default function ReceiptForm() {
   const handleLineChange = (index, field, value) => {
     const newLines = [...lines];
     newLines[index][field] = value;
+
+    if (field === 'received_qty' || field === 'unit_price') {
+      const qty = parseFloat(newLines[index].received_qty) || 0;
+      const price = parseFloat(newLines[index].unit_price) || 0;
+      newLines[index].line_total = qty * price;
+    }
+
     setLines(newLines);
   };
 
@@ -82,11 +91,15 @@ export default function ReceiptForm() {
 
       const payload = {
         po: poId,
-        ...receiptData,
+        receipt_date: receiptData.receipt_date,
+        warehouse: receiptData.warehouse,
+        location: receiptData.location || null,
+        supplier_invoice: receiptData.supplier_invoice,
+        notes: receiptData.notes,
         lines: lines.map(line => ({
           po_line_id: line.id,
           item: line.item,
-          received_qty: line.received_qty,
+          received_qty: parseFloat(line.received_qty) || 0,
           batch_number: line.batch_number || '',
           serial_number: line.serial_number || '',
           expiry_date: line.expiry_date || null,
@@ -99,8 +112,10 @@ export default function ReceiptForm() {
         body: JSON.stringify(payload),
         credentials: 'include',
       });
+
       const data = await res.json();
-      if (data.success) {
+
+      if (res.ok && data.success) {
         setMessage('Receipt saved successfully!');
         setTimeout(() => navigate(`/dashboard/${tenant}/inventory/receipts`), 1500);
       } else {
@@ -113,10 +128,14 @@ export default function ReceiptForm() {
     }
   };
 
+  const grandTotal = lines.reduce((sum, line) => sum + line.line_total, 0);
+  const tax = grandTotal * 0.1; // 10% GST
+  const totalInclGST = grandTotal + tax;
+
   if (loading) return <div className="text-center py-20 text-2xl">Loading receipt form...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Receive Purchase Order {po?.po_number || poId}</h1>
       <p className="text-xl text-gray-600 mb-8">Supplier: {po?.supplier || 'Loading...'}</p>
 
@@ -194,88 +213,83 @@ export default function ReceiptForm() {
           </div>
 
           <div className="space-y-4">
-            {lines.map((line, index) => (
-              <div key={line.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
-                {/* Item */}
-                <div className="md:col-span-4">
-                  <div className="font-medium">{line.itemText}</div>
-                  <div className="text-sm text-gray-600">{line.uom}</div>
-                </div>
-
-                {/* Ordered */}
-                <div className="md:col-span-1 text-right">{line.ordered_qty.toFixed(2)}</div>
-
-                {/* Received */}
-                <div className="md:col-span-1">
-                  <input
-                    type="number"
-                    value={line.received_qty}
-                    onChange={(e) => {
-                      const qty = e.target.value;
-                      handleLineChange(index, 'received_qty', qty);
-                      // Auto calculate line total
-                      const price = line.unit_price || 0;
-                      handleLineChange(index, 'line_total', qty * price);
-                    }}
-                    min="0"
-                    max={line.ordered_qty}
-                    step="0.01"
-                    className="w-full px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
-                    required
-                  />
-                </div>
-
-                {/* Unit Price */}
-                <div className="md:col-span-2">
-                  <input
-                    type="number"
-                    value={line.unit_price || ''}
-                    onChange={(e) => {
-                      const price = e.target.value;
-                      handleLineChange(index, 'unit_price', price);
-                      const qty = line.received_qty || 0;
-                      handleLineChange(index, 'line_total', qty * price);
-                    }}
-                    step="0.01"
-                    className="w-full px-3 py-2 border rounded text-right font-mono focus:ring-2 focus:ring-green-500"
-                    required
-                  />
-                </div>
-
-                {/* Line Total */}
-                <div className="md:col-span-2 text-right font-bold text-lg font-mono">
-                  ${(line.line_total || 0).toFixed(2)}
-                </div>
-
-                {/* Batch / Serial */}
-                <div className="md:col-span-1">
-                  <input
-                    type="text"
-                    value={line.batch_number}
-                    onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
-                    placeholder="Batch"
-                    className="w-full px-3 py-2 border rounded text-center"
-                  />
-                  <input
-                    type="text"
-                    value={line.serial_number}
-                    onChange={(e) => handleLineChange(index, 'serial_number', e.target.value)}
-                    placeholder="Serial"
-                    className="w-full px-3 py-2 border rounded text-center mt-2"
-                  />
-                </div>
-
-                {/* Expiry */}
-                <div className="md:col-span-1">
-                  <input
-                    type="date"
-                    value={line.expiry_date}
-                    onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
-                    className="w-full px-3 py-2 border rounded"
-                  />
-                </div>
+            {lines.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No items on this PO
               </div>
-            ))}
+            ) : (
+              lines.map((line, index) => (
+                <div key={line.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
+                  {/* Item */}
+                  <div className="md:col-span-4">
+                    <div className="font-medium">{line.itemText}</div>
+                    <div className="text-sm text-gray-600">{line.uom}</div>
+                  </div>
+
+                  {/* Ordered */}
+                  <div className="md:col-span-1 text-right">{line.ordered_qty.toFixed(2)}</div>
+
+                  {/* Received */}
+                  <div className="md:col-span-1">
+                    <input
+                      type="number"
+                      value={line.received_qty}
+                      onChange={(e) => {
+                        const qty = e.target.value;
+                        handleLineChange(index, 'received_qty', qty);
+                        const price = line.unit_price || 0;
+                        handleLineChange(index, 'line_total', qty * price);
+                      }}
+                      min="0"
+                      max={line.ordered_qty}
+                      step="0.01"
+                      className="w-full px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+
+                  {/* Unit Price */}
+                  <div className="md:col-span-2">
+                    <div className="px-4 py-3 bg-gray-100 rounded-lg text-right font-mono">
+                      ${line.unit_price.toFixed(2)}
+                    </div>
+                  </div>
+
+                  {/* Line Total */}
+                  <div className="md:col-span-2 text-right font-bold text-lg font-mono">
+                    ${line.line_total.toFixed(2)}
+                  </div>
+
+                  {/* Batch / Serial */}
+                  <div className="md:col-span-1">
+                    <input
+                      type="text"
+                      value={line.batch_number}
+                      onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
+                      placeholder="Batch"
+                      className="w-full px-3 py-2 border rounded text-center"
+                    />
+                    <input
+                      type="text"
+                      value={line.serial_number}
+                      onChange={(e) => handleLineChange(index, 'serial_number', e.target.value)}
+                      placeholder="Serial"
+                      className="w-full px-3 py-2 border rounded text-center mt-2"
+                    />
+                  </div>
+
+                  {/* Expiry */}
+                  <div className="md:col-span-1">
+                    <input
+                      type="date"
+                      value={line.expiry_date}
+                      onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Totals */}
@@ -284,13 +298,13 @@ export default function ReceiptForm() {
               <div className="text-right">
                 <p className="text-xl font-bold">Total Ex GST</p>
                 <p className="text-3xl font-bold text-green-700 font-mono">
-                  ${lines.reduce((sum, line) => sum + (line.line_total || 0), 0).toFixed(2)}
+                  ${grandTotal.toFixed(2)}
                 </p>
                 <p className="text-lg text-gray-600 mt-2">
-                  Tax @ 10% = ${(lines.reduce((sum, line) => sum + (line.line_total || 0), 0) * 0.1).toFixed(2)}
+                  Tax @ 10% = ${tax.toFixed(2)}
                 </p>
                 <p className="text-2xl font-bold text-green-700 mt-2">
-                  Total Incl GST = ${(lines.reduce((sum, line) => sum + (line.line_total || 0), 0) * 1.1).toFixed(2)}
+                  Total Incl GST = ${totalInclGST.toFixed(2)}
                 </p>
               </div>
             </div>
