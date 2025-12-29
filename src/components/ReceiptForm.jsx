@@ -181,71 +181,120 @@ export default function ReceiptForm() {
         {/* Line Items */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Items to Receive</h2>
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left">Item</th>
-                <th className="px-6 py-3 text-right">Ordered</th>
-                <th className="px-6 py-3 text-right">Received</th>
-                <th className="px-6 py-3 text-right">Batch / Serial</th>
-                <th className="px-6 py-3 text-right">Expiry</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {lines.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                    No items on this PO
-                  </td>
-                </tr>
-              ) : (
-                lines.map((line, index) => (
-                  <tr key={line.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      {line.itemText} ({line.uom})
-                    </td>
-                    <td className="px-6 py-4 text-right">{line.ordered_qty.toFixed(2)}</td>
-                    <td className="px-6 py-4 text-right">
-                      <input
-                        type="number"
-                        value={line.received_qty}
-                        onChange={(e) => handleLineChange(index, 'received_qty', e.target.value)}
-                        min="0"
-                        max={line.ordered_qty}
-                        step="0.01"
-                        className="w-32 px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
-                        required
-                      />
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <input
-                        type="text"
-                        value={line.batch_number}
-                        onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
-                        placeholder="Batch"
-                        className="w-32 px-3 py-2 border rounded text-center"
-                      />
-                      <input
-                        type="text"
-                        value={line.serial_number}
-                        onChange={(e) => handleLineChange(index, 'serial_number', e.target.value)}
-                        placeholder="Serial"
-                        className="w-32 px-3 py-2 border rounded text-center mt-2"
-                      />
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <input
-                        type="date"
-                        value={line.expiry_date}
-                        onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
-                        className="w-40 px-3 py-2 border rounded"
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+
+          {/* Column Headers */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-800 text-white rounded-t-lg font-medium">
+            <div className="md:col-span-4">Item</div>
+            <div className="md:col-span-1 text-right">Ordered</div>
+            <div className="md:col-span-1 text-right">Received</div>
+            <div className="md:col-span-2 text-right">Unit Price</div>
+            <div className="md:col-span-2 text-right">Line Total</div>
+            <div className="md:col-span-1 text-right">Batch / Serial</div>
+            <div className="md:col-span-1 text-right">Expiry</div>
+          </div>
+
+          <div className="space-y-4">
+            {lines.map((line, index) => (
+              <div key={line.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
+                {/* Item */}
+                <div className="md:col-span-4">
+                  <div className="font-medium">{line.itemText}</div>
+                  <div className="text-sm text-gray-600">{line.uom}</div>
+                </div>
+
+                {/* Ordered */}
+                <div className="md:col-span-1 text-right">{line.ordered_qty.toFixed(2)}</div>
+
+                {/* Received */}
+                <div className="md:col-span-1">
+                  <input
+                    type="number"
+                    value={line.received_qty}
+                    onChange={(e) => {
+                      const qty = e.target.value;
+                      handleLineChange(index, 'received_qty', qty);
+                      // Auto calculate line total
+                      const price = line.unit_price || 0;
+                      handleLineChange(index, 'line_total', qty * price);
+                    }}
+                    min="0"
+                    max={line.ordered_qty}
+                    step="0.01"
+                    className="w-full px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Unit Price */}
+                <div className="md:col-span-2">
+                  <input
+                    type="number"
+                    value={line.unit_price || ''}
+                    onChange={(e) => {
+                      const price = e.target.value;
+                      handleLineChange(index, 'unit_price', price);
+                      const qty = line.received_qty || 0;
+                      handleLineChange(index, 'line_total', qty * price);
+                    }}
+                    step="0.01"
+                    className="w-full px-3 py-2 border rounded text-right font-mono focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                {/* Line Total */}
+                <div className="md:col-span-2 text-right font-bold text-lg font-mono">
+                  ${(line.line_total || 0).toFixed(2)}
+                </div>
+
+                {/* Batch / Serial */}
+                <div className="md:col-span-1">
+                  <input
+                    type="text"
+                    value={line.batch_number}
+                    onChange={(e) => handleLineChange(index, 'batch_number', e.target.value)}
+                    placeholder="Batch"
+                    className="w-full px-3 py-2 border rounded text-center"
+                  />
+                  <input
+                    type="text"
+                    value={line.serial_number}
+                    onChange={(e) => handleLineChange(index, 'serial_number', e.target.value)}
+                    placeholder="Serial"
+                    className="w-full px-3 py-2 border rounded text-center mt-2"
+                  />
+                </div>
+
+                {/* Expiry */}
+                <div className="md:col-span-1">
+                  <input
+                    type="date"
+                    value={line.expiry_date}
+                    onChange={(e) => handleLineChange(index, 'expiry_date', e.target.value)}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Totals */}
+          <div className="mt-8 bg-gray-50 p-6 rounded-lg">
+            <div className="flex justify-end space-y-2">
+              <div className="text-right">
+                <p className="text-xl font-bold">Total Ex GST</p>
+                <p className="text-3xl font-bold text-green-700 font-mono">
+                  ${lines.reduce((sum, line) => sum + (line.line_total || 0), 0).toFixed(2)}
+                </p>
+                <p className="text-lg text-gray-600 mt-2">
+                  Tax @ 10% = ${(lines.reduce((sum, line) => sum + (line.line_total || 0), 0) * 0.1).toFixed(2)}
+                </p>
+                <p className="text-2xl font-bold text-green-700 mt-2">
+                  Total Incl GST = ${(lines.reduce((sum, line) => sum + (line.line_total || 0), 0) * 1.1).toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Notes */}
