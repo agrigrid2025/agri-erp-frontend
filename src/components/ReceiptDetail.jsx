@@ -65,6 +65,8 @@ export default function ReceiptDetail() {
               <th className="px-6 py-3 text-left">Item</th>
               <th className="px-6 py-3 text-right">Ordered</th>
               <th className="px-6 py-3 text-right">Received</th>
+              <th className="px-6 py-3 text-right">Unit Price</th>
+              <th className="px-6 py-3 text-right">Line Total</th>
               <th className="px-6 py-3 text-right">Batch / Serial</th>
               <th className="px-6 py-3 text-right">Expiry</th>
             </tr>
@@ -72,32 +74,46 @@ export default function ReceiptDetail() {
           <tbody className="divide-y divide-gray-200">
             {receipt.lines.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
                   No items received
                 </td>
               </tr>
             ) : (
-              receipt.lines.map(line => (
-                <tr key={line.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <span className="font-medium">{line.item.sku}</span> — {line.item.name}
-                  </td>
-                  <td className="px-6 py-4 text-right">{line.ordered_qty.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-right text-green-600 font-bold">
-                    {line.received_qty.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {line.batch_number ? <span className="font-mono text-sm">B: {line.batch_number}</span> : ''}
-                    {line.serial_number ? <span className="font-mono text-sm ml-2">S: {line.serial_number}</span> : ''}
-                    {!line.batch_number && !line.serial_number ? '—' : ''}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {line.expiry_date ? new Date(line.expiry_date).toLocaleDateString() : '—'}
-                  </td>
-                </tr>
-              ))
+              receipt.lines.map(line => {
+                const lineTotal = line.received_qty * line.unit_price_ex_gst;
+                return (
+                  <tr key={line.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <span className="font-medium">{line.item.sku}</span> — {line.item.name}
+                    </td>
+                    <td className="px-6 py-4 text-right">{line.ordered_qty.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right text-green-600 font-bold">
+                      {line.received_qty.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 text-right font-mono">${line.unit_price_ex_gst.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right font-mono font-bold">${lineTotal.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right">
+                      {line.batch_number ? <span className="font-mono text-sm">B: {line.batch_number}</span> : ''}
+                      {line.serial_number ? <span className="font-mono text-sm ml-2">S: {line.serial_number}</span> : ''}
+                      {!line.batch_number && !line.serial_number ? '—' : ''}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {line.expiry_date ? new Date(line.expiry_date).toLocaleDateString() : '—'}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
+          <tfoot className="bg-gray-50 font-bold">
+            <tr>
+              <td colSpan="4" className="px-6 py-4 text-right">Receipt Total (ex GST)</td>
+              <td className="px-6 py-4 text-right font-mono text-2xl text-green-700">
+                ${receipt.lines.reduce((sum, line) => sum + (line.received_qty * line.unit_price_ex_gst), 0).toFixed(2)}
+              </td>
+              <td colSpan="2"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
