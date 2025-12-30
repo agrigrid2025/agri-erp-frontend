@@ -38,7 +38,7 @@ export default function ReceiptForm() {
           uom: line.item.uom,
           ordered_qty: line.ordered_qty,
           received_qty: 0,
-          unit_price: line.unit_price_ex_gst,  // Pre-populate from PO
+          unit_price: line.unit_price_ex_gst,
           line_total: 0,
           batch_number: '',
           serial_number: '',
@@ -74,8 +74,8 @@ export default function ReceiptForm() {
     const newLines = [...lines];
     newLines[index][field] = value;
 
-    if (field === 'received_qty' || field === 'unit_price') {
-      const qty = parseFloat(newLines[index].received_qty) || 0;
+    if (field === 'received_qty') {
+      const qty = parseFloat(value) || 0;
       const price = parseFloat(newLines[index].unit_price) || 0;
       newLines[index].line_total = qty * price;
     }
@@ -84,6 +84,17 @@ export default function ReceiptForm() {
   };
 
   const handleSave = async () => {
+    // Validation
+    if (!receiptData.warehouse) {
+      setMessage('Please select a warehouse');
+      return;
+    }
+
+    if (lines.some(line => (parseFloat(line.received_qty) || 0) > line.ordered_qty)) {
+      setMessage('Received quantity cannot exceed ordered quantity');
+      return;
+    }
+
     setSaving(true);
     setMessage('');
     try {
@@ -129,7 +140,7 @@ export default function ReceiptForm() {
   };
 
   const grandTotal = lines.reduce((sum, line) => sum + line.line_total, 0);
-  const tax = grandTotal * 0.1; // 10% GST
+  const tax = grandTotal * 0.1;
   const totalInclGST = grandTotal + tax;
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading receipt form...</div>;
