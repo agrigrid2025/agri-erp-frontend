@@ -50,6 +50,9 @@ import PODetail from './components/PODetail';
 import ReceiptForm from './components/ReceiptForm';
 import ReceiptList from './components/ReceiptList';
 import ReceiptDetail from './components/ReceiptDetail';
+import EquipmentTypeList from './components/EquipmentTypeList';
+import EquipmentTypeForm from './components/EquipmentTypeForm';
+
 
 function App() {
   return (
@@ -134,6 +137,12 @@ function App() {
 
             {/* Equipment */}
             <Route path="equipment/list" element={<EquipmentList />} />
+            <Route path="equipment/add" element={<EquipmentForm />} />
+            <Route path="equipment/edit/:equipId" element={<EquipmentForm />} />
+            <Route path="equipment/types" element={<EquipmentTypeList />} />
+            <Route path="equipment/types/add" element={<EquipmentTypeForm />} />
+            <Route path="equipment/types/edit/:typeId" element={<EquipmentTypeForm />} />
+            <Route path="equipment" element={<EquipmentList />} />
             <Route path="equipment/add" element={<EquipmentForm />} />
             <Route path="equipment/edit/:equipId" element={<EquipmentForm />} />
 
