@@ -50,7 +50,7 @@ export default function EquipmentForm() {
             setFormData({
               name: eq.name,
               fleet_number: eq.fleet_number || '',
-              equipment_type: eq.equipment_type || '',
+              equipment_type: eq.type || '',
               make: eq.make,
               model: eq.model,
               registration_number: eq.registration_number || '',
@@ -311,7 +311,7 @@ export default function EquipmentForm() {
             <span className="text-gray-700">Requires Calibration</span>
           </label>
           {formData.requires_calibration && (
-            <div>
+            <div className="ml-8">
               <label className="block text-sm font-medium text-gray-700 mb-2">Calibration Expiry</label>
               <input
                 type="date"
