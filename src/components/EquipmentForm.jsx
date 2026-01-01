@@ -38,7 +38,8 @@ export default function EquipmentForm() {
     // Load equipment types
     fetch(`https://${tenant}.agrigrid.net/equipment/api/equipment-types/`, { credentials: 'include' })
       .then(r => r.json())
-      .then(data => setTypes(data.types || []));
+      .then(data => setTypes(data.types || []))
+      .catch(err => console.error('Failed to load types:', err));
 
     if (isEdit && equipId) {
       // Load existing equipment
@@ -48,11 +49,11 @@ export default function EquipmentForm() {
           const eq = data.equipment.find(e => e.id === parseInt(equipId));
           if (eq) {
             setFormData({
-              name: eq.name,
+              name: eq.name || '',
               fleet_number: eq.fleet_number || '',
               equipment_type: eq.type || '',
-              make: eq.make,
-              model: eq.model,
+              make: eq.make || '',
+              model: eq.model || '',
               registration_number: eq.registration_number || '',
               serial_number: eq.serial_number || '',
               boom_width_metres: eq.boom_width_metres || '',
@@ -64,13 +65,16 @@ export default function EquipmentForm() {
               next_service_due: eq.next_service_due || '',
               requires_calibration: eq.requires_calibration || false,
               calibration_expiry: eq.calibration_expiry || '',
-              is_active: eq.is_active,
+              is_active: eq.is_active || true,
               notes: eq.notes || '',
             });
           }
           setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch(err => {
+          console.error('Failed to load equipment:', err);
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -94,9 +98,9 @@ export default function EquipmentForm() {
         ...formData,
         id: isEdit ? equipId : undefined,
         equipment_type: formData.equipment_type || null,
-        boom_width_metres: formData.boom_width_metres || null,
-        tank_capacity_litres: formData.tank_capacity_litres || null,
-        pump_flow_lpm: formData.pump_flow_lpm || null,
+        boom_width_metres: formData.boom_width_metres ? parseFloat(formData.boom_width_metres) : null,
+        tank_capacity_litres: formData.tank_capacity_litres ? parseInt(formData.tank_capacity_litres) : null,
+        pump_flow_lpm: formData.pump_flow_lpm ? parseFloat(formData.pump_flow_lpm) : null,
         purchase_date: formData.purchase_date || null,
         warranty_expiry: formData.warranty_expiry || null,
         last_service_date: formData.last_service_date || null,
@@ -110,15 +114,18 @@ export default function EquipmentForm() {
         body: JSON.stringify(payload),
         credentials: 'include',
       });
+
       const data = await res.json();
-      if (data.success) {
+
+      if (res.ok && data.success) {
         setMessage('Equipment saved successfully!');
         setTimeout(() => navigate(`/dashboard/${tenant}/equipment`), 1500);
       } else {
         setMessage(data.error || 'Save failed');
       }
     } catch (err) {
-      setMessage('Network error');
+      setMessage('Network error — check connection');
+      console.error(err);
     } finally {
       setSaving(false);
     }
