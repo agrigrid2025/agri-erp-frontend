@@ -88,12 +88,37 @@ export default function EquipmentForm() {
     setSaving(true);
     setMessage('');
     try {
-      // Placeholder — add real save API when ready
-      console.log('Saving equipment:', formData);
-      setMessage('Equipment saved successfully! (placeholder)');
-      setTimeout(() => navigate(`/dashboard/${tenant}/equipment`), 1500);
+      const url = `https://${tenant}.agrigrid.net/equipment/api/equipment/save/`;
+
+      const payload = {
+        ...formData,
+        id: isEdit ? equipId : undefined,
+        equipment_type: formData.equipment_type || null,
+        boom_width_metres: formData.boom_width_metres || null,
+        tank_capacity_litres: formData.tank_capacity_litres || null,
+        pump_flow_lpm: formData.pump_flow_lpm || null,
+        purchase_date: formData.purchase_date || null,
+        warranty_expiry: formData.warranty_expiry || null,
+        last_service_date: formData.last_service_date || null,
+        next_service_due: formData.next_service_due || null,
+        calibration_expiry: formData.calibration_expiry || null,
+      };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage('Equipment saved successfully!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/equipment`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
     } catch (err) {
-      setMessage('Save failed');
+      setMessage('Network error');
     } finally {
       setSaving(false);
     }
