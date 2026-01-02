@@ -13,7 +13,7 @@ export default function Layout() {
   // Dynamic page title
   useEffect(() => {
     if (tenant) {
-      document.title = `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} - AgriGrid`;
+      document.title = `AgriGrid - ${tenant.charAt(0).toUpperCase() + tenant.slice(1)}`;
     } else {
       document.title = 'AgriGrid';
     }
