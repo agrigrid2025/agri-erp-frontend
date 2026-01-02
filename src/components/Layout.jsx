@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, Outlet, useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function Layout() {
   const { tenant } = useParams();
