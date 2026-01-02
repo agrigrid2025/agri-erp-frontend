@@ -1,5 +1,5 @@
-import { Link, Outlet, useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Link, Outlet, useParams, useNavigate } from 'react-router-dom';
 
 export default function Layout() {
   const { tenant } = useParams();
@@ -10,7 +10,7 @@ export default function Layout() {
   const user = userJson ? JSON.parse(userJson) : null;
   const isAdmin = user?.role === 'admin';
 
-  // Add dynamic title
+  // Dynamic page title
   useEffect(() => {
     if (tenant) {
       document.title = `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} - AgriGrid`;
@@ -28,6 +28,48 @@ export default function Layout() {
       navigate('/');
     });
   };
+
+  // SidebarSection component
+  function SidebarSection({ title, icon, children, defaultOpen = false }) {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+
+    return (
+      <div className="mb-2">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-green-50 transition text-left"
+        >
+          <span className="flex items-center gap-3">
+            <span className="text-2xl">{icon}</span>
+            <span className="font-medium text-gray-800">{title}</span>
+          </span>
+          {children && (
+            <svg
+              className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+        </button>
+        {isOpen && <div className="mt-1">{children}</div>}
+      </div>
+    );
+  }
+
+  // SidebarLink component
+  function SidebarLink({ to, label }) {
+    return (
+      <Link
+        to={to}
+        className="block py-2 px-4 ml-8 rounded hover:bg-green-100 transition text-sm text-gray-700 hover:text-green-800"
+      >
+        {label}
+      </Link>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -172,35 +214,6 @@ export default function Layout() {
       <main className="flex-1 p-8 lg:p-12 overflow-auto">
         <Outlet />
       </main>
-    </div>
-  );
-}
-
-function SidebarSection({ title, icon, children, defaultOpen = false }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  return (
-    <div className="mb-2">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-green-50 transition text-left"
-      >
-        <span className="flex items-center gap-3">
-          <span className="text-2xl">{icon}</span>
-          <span className="font-medium text-gray-800">{title}</span>
-        </span>
-        {children && (
-          <svg
-            className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? 'rotate-90' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        )}
-      </button>
-      {isOpen && <div className="mt-1">{children}</div>}
     </div>
   );
 }
