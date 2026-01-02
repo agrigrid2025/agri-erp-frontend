@@ -205,4 +205,12 @@ function SidebarLink({ to, label }) {
       {label}
     </Link>
   );
+
+  useEffect(() => {
+  if (tenant) {
+    document.title = `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} - AgriGrid`;
+  } else {
+    document.title = 'AgriGrid';
+  }
+}, [tenant]);
 }
