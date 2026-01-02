@@ -10,6 +10,15 @@ export default function Layout() {
   const user = userJson ? JSON.parse(userJson) : null;
   const isAdmin = user?.role === 'admin';
 
+  // Add dynamic title
+  useEffect(() => {
+    if (tenant) {
+      document.title = `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} - AgriGrid`;
+    } else {
+      document.title = 'AgriGrid';
+    }
+  }, [tenant]);
+
   const handleLogout = () => {
     fetch(`https://${tenant}.agrigrid.net/logout/`, {
       method: 'POST',
@@ -194,23 +203,4 @@ function SidebarSection({ title, icon, children, defaultOpen = false }) {
       {isOpen && <div className="mt-1">{children}</div>}
     </div>
   );
-}
-
-function SidebarLink({ to, label }) {
-  return (
-    <Link
-      to={to}
-      className="block py-2 px-4 ml-8 rounded hover:bg-green-100 transition text-sm text-gray-700 hover:text-green-800"
-    >
-      {label}
-    </Link>
-  );
-
-  useEffect(() => {
-  if (tenant) {
-    document.title = `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} - AgriGrid`;
-  } else {
-    document.title = 'AgriGrid';
-  }
-}, [tenant]);
 }
