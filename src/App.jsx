@@ -52,6 +52,8 @@ import ReceiptList from './components/ReceiptList';
 import ReceiptDetail from './components/ReceiptDetail';
 import EquipmentTypeList from './components/EquipmentTypeList';
 import EquipmentTypeForm from './components/EquipmentTypeForm';
+import StockAdjust from './components/StockAdjust';
+
 
 
 function App() {
@@ -124,7 +126,10 @@ function App() {
             <Route path="inventory/suppliers" element={<SuppliersList />} />
             <Route path="inventory/suppliers/add" element={<SupplierForm />} />
             <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />
-            
+
+            {/* Inventory - Stock Adjust */}
+            <Route path="inventory/adjust" element={<StockAdjust />} />
+
             {/* Inventory - Locations */}
             <Route path="inventory/locations" element={<LocationList />} />
             <Route path="inventory/locations/add" element={<LocationForm />} />
