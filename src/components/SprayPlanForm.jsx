@@ -55,6 +55,10 @@ export default function SprayPlanForm() {
     loadData();
   }, [tenant]);
 
+    useEffect(() => {
+    updateEquipmentStatus();
+  }, [formData.equipment, equipment]);
+
   const updateForecast = () => {
     const blockId = formData.block;
     const scheduled = formData.scheduled_date;
