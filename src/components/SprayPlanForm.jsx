@@ -58,7 +58,8 @@ export default function SprayPlanForm() {
     if (blockId && scheduled) {
       fetch(`/spray/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`)
         .then(r => r.text())
-        .then(html => setForecast(html));
+        .then(html => setForecast(html))
+        .catch(() => setForecast('<p className="text-red-600">Failed to load forecast</p>'));
     } else {
       setForecast('<p className="text-gray-600">Select block and time above</p>');
     }
@@ -66,15 +67,41 @@ export default function SprayPlanForm() {
 
   const updateEquipmentStatus = () => {
     const equipId = formData.equipment;
-    if (equipId) {
-      // Placeholder — add real status API when ready
-      setEquipmentStatus({
-        service: 'Good',
-        calibration: 'Good',
-      });
-    } else {
+    if (!equipId) {
       setEquipmentStatus({});
+      return;
     }
+
+    const equip = equipment.find(e => e.id == equipId);
+    if (!equip) {
+      setEquipmentStatus({});
+      return;
+    }
+
+    const today = new Date();
+
+    // Service status
+    let serviceStatus = 'Good';
+    if (equip.next_service_due) {
+      const nextService = new Date(equip.next_service_due);
+      const days = Math.ceil((nextService - today) / (1000 * 60 * 60 * 24));
+      if (days <= 7) serviceStatus = 'Do Not Use';
+      else if (days <= 30) serviceStatus = 'Caution';
+    }
+
+    // Calibration status
+    let calStatus = 'Good';
+    if (equip.calibration_expiry) {
+      const calExpiry = new Date(equip.calibration_expiry);
+      const days = Math.ceil((calExpiry - today) / (1000 * 60 * 60 * 24));
+      if (days <= 7) calStatus = 'Do Not Use';
+      else if (days <= 30) calStatus = 'Caution';
+    }
+
+    setEquipmentStatus({
+      service: serviceStatus,
+      calibration: calStatus,
+    });
   };
 
   const handleChange = (e) => {
@@ -173,14 +200,22 @@ export default function SprayPlanForm() {
           </div>
 
           {equipmentStatus.service && (
-            <div className="text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg bg-emerald-400">
+            <div className={`text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg ${
+              equipmentStatus.service === 'Good' ? 'bg-emerald-400' :
+              equipmentStatus.service === 'Caution' ? 'bg-amber-400' :
+              'bg-rose-400'
+            }`}>
               <div className="text-xs opacity-90">Service</div>
               <div className="text-base">{equipmentStatus.service}</div>
             </div>
           )}
 
           {equipmentStatus.calibration && (
-            <div className="text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg bg-emerald-400">
+            <div className={`text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg ${
+              equipmentStatus.calibration === 'Good' ? 'bg-emerald-400' :
+              equipmentStatus.calibration === 'Caution' ? 'bg-amber-400' :
+              'bg-rose-400'
+            }`}>
               <div className="text-xs opacity-90">Calibration</div>
               <div className="text-base">{equipmentStatus.calibration}</div>
             </div>
