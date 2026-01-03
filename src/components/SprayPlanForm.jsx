@@ -42,7 +42,7 @@ export default function SprayPlanForm() {
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
 
-        // Update equipment status after equipment is loaded
+        // Update status after equipment loaded
         updateEquipmentStatus();
       } catch (err) {
         console.error(err);
@@ -62,9 +62,9 @@ export default function SprayPlanForm() {
       fetch(`/spray/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`)
         .then(r => r.text())
         .then(html => setForecast(html))
-        .catch(() => setForecast('<p className="text-red-600">Failed to load forecast</p>'));
+        .catch(() => setForecast('<p class="text-red-600">Failed to load forecast</p>'));
     } else {
-      setForecast('<p className="text-gray-600">Select block and time above</p>');
+      setForecast('<p class="text-gray-600">Select block and time above</p>');
     }
   };
 
@@ -84,21 +84,23 @@ export default function SprayPlanForm() {
     const today = new Date();
 
     // Service status
-    let serviceStatus = 'Good';
+    let serviceStatus = 'No date set';
     if (equip.next_service_due) {
       const nextService = new Date(equip.next_service_due);
       const days = Math.ceil((nextService - today) / (1000 * 60 * 60 * 24));
       if (days <= 7) serviceStatus = 'Do Not Use';
       else if (days <= 30) serviceStatus = 'Caution';
+      else serviceStatus = 'Good';
     }
 
     // Calibration status
-    let calStatus = 'Good';
+    let calStatus = 'No date set';
     if (equip.calibration_expiry) {
       const calExpiry = new Date(equip.calibration_expiry);
       const days = Math.ceil((calExpiry - today) / (1000 * 60 * 60 * 24));
       if (days <= 7) calStatus = 'Do Not Use';
       else if (days <= 30) calStatus = 'Caution';
+      else calStatus = 'Good';
     }
 
     setEquipmentStatus({
@@ -206,7 +208,8 @@ export default function SprayPlanForm() {
             <div className={`text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg ${
               equipmentStatus.service === 'Good' ? 'bg-emerald-400' :
               equipmentStatus.service === 'Caution' ? 'bg-amber-400' :
-              'bg-rose-400'
+              equipmentStatus.service === 'Do Not Use' ? 'bg-rose-400' :
+              'bg-gray-400'
             }`}>
               <div className="text-xs opacity-90">Service</div>
               <div className="text-base">{equipmentStatus.service}</div>
@@ -217,7 +220,8 @@ export default function SprayPlanForm() {
             <div className={`text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg ${
               equipmentStatus.calibration === 'Good' ? 'bg-emerald-400' :
               equipmentStatus.calibration === 'Caution' ? 'bg-amber-400' :
-              'bg-rose-400'
+              equipmentStatus.calibration === 'Do Not Use' ? 'bg-rose-400' :
+              'bg-gray-400'
             }`}>
               <div className="text-xs opacity-90">Calibration</div>
               <div className="text-base">{equipmentStatus.calibration}</div>
@@ -252,7 +256,7 @@ export default function SprayPlanForm() {
         </div>
 
         <div className="text-center">
-          <div dangerouslySetInnerHTML={{ __html: forecast || '<p className="text-gray-600">Select block and time above</p>' }} />
+          <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-gray-600">Select block and time above</p>' }} />
         </div>
 
         <hr className="my-8 border-green-500" />
