@@ -57,25 +57,31 @@ export default function ItemStockAdjustmentForm() {
   };
 
   const handleSave = async () => {
-    if (!formData.adjustment_qty) {
-      setMessage('Adjustment quantity is required');
+    // Prevent double execution
+    if (saving) return;
+
+    // Validation
+    const qty = parseFloat(formData.adjustment_qty);
+    if (isNaN(qty) || qty === 0) {
+      setMessage('Please enter a valid adjustment quantity (cannot be zero)');
       return;
     }
 
     setSaving(true);
     setMessage('');
+
     try {
       const url = `https://${tenant}.agrigrid.net/inventory3/api/stock-adjust/save/`;
 
       const payload = {
-        item_id: itemId,
-        warehouse_id: formData.warehouse || null,
-        location_id: formData.location || null,
-        batch_number: formData.batch_number || '',
-        serial_number: formData.serial_number || '',
+        item_id: parseInt(itemId),
+        warehouse_id: formData.warehouse ? parseInt(formData.warehouse) : null,
+        location_id: formData.location ? parseInt(formData.location) : null,
+        batch_number: formData.batch_number.trim() || '',
+        serial_number: formData.serial_number.trim() || '',
         expiry_date: formData.expiry_date || null,
-        adjustment_qty: parseFloat(formData.adjustment_qty),
-        notes: formData.notes || '',
+        adjustment_qty: qty,
+        notes: formData.notes.trim() || '',
       };
 
       const res = await fetch(url, {
@@ -94,6 +100,7 @@ export default function ItemStockAdjustmentForm() {
         setMessage(data.error || 'Save failed');
       }
     } catch (err) {
+      console.error('Adjustment save error:', err);
       setMessage('Network error');
     } finally {
       setSaving(false);

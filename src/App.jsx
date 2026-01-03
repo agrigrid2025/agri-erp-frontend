@@ -120,6 +120,7 @@ function App() {
             <Route path="inventory/warehouses/add" element={<WarehouseForm />} />
             <Route path="inventory/warehouses/edit/:whId" element={<WarehouseForm />} />
             <Route path="inventory/stock" element={<StockList />} />
+            <Route path="inventory/items/:itemId/history" element={<StockHistory />} />
 
             {/* Inventory - Suppliers */}
             <Route path="suppliers" element={<SuppliersList />} />
