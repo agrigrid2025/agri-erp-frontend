@@ -55,6 +55,10 @@ import EquipmentTypeForm from './components/EquipmentTypeForm';
 import ItemStockAdjustmentForm from './components/ItemStockAdjustmentForm';
 import GeneralStockAdjustment from './components/GeneralStockAdjustment';
 import StockHistory from './components/StockHistory';
+import SprayPlanList from './components/SprayPlanList';
+import SprayPlanForm from './components/SprayPlanForm';
+import SprayRecordForm from './components/SprayRecordForm';
+import SprayRecordDetail from './components/SprayRecordDetail';
 
 
 
@@ -166,6 +170,13 @@ function App() {
             {/* Purchase Receipts */}
             <Route path="inventory/receipts" element={<ReceiptList />} />
             <Route path="inventory/receipt/:receiptId" element={<ReceiptDetail />} />
+
+            {/* Spray Plans */}
+            <Route path="spray/plans" element={<SprayPlanList />} />
+            <Route path="spray/plans/add" element={<SprayPlanForm />} />
+            <Route path="spray/plans/edit/:planId" element={<SprayPlanForm />} />
+            <Route path="spray/record/new/:planId" element={<SprayRecordForm />} />
+            <Route path="spray/record/:recordId" element={<SprayRecordDetail />} />
           
 
           </Route>
