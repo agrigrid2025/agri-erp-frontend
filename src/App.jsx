@@ -52,8 +52,9 @@ import ReceiptList from './components/ReceiptList';
 import ReceiptDetail from './components/ReceiptDetail';
 import EquipmentTypeList from './components/EquipmentTypeList';
 import EquipmentTypeForm from './components/EquipmentTypeForm';
-import StockAdjust from './components/StockAdjust';
-import StockAdjustmentForm from './components/StockAdjustmentForm';
+import ItemStockAdjustmentForm from './components/ItemStockAdjustmentForm';
+import GeneralStockAdjustment from './components/GeneralStockAdjustment';
+
 
 
 
@@ -129,8 +130,8 @@ function App() {
             <Route path="inventory/suppliers/edit/:supId" element={<SupplierForm />} />
 
             {/* Inventory - Stock Adjust */}
-            <Route path="inventory/adjust" element={<StockAdjust />} />
-            <Route path="inventory/adjust/new" element={<StockAdjustmentForm />} />
+            <Route path="inventory/items/:itemId/adjust" element={<ItemStockAdjustmentForm />} />
+            <Route path="inventory/adjust" element={<GeneralStockAdjustment />} />
 
             {/* Inventory - Locations */}
             <Route path="inventory/locations" element={<LocationList />} />
