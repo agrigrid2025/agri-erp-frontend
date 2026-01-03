@@ -57,49 +57,60 @@ export default function StockAdjustmentForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    if (!formData.item || !formData.adjustment_qty) {
-      setMessage('Item and adjustment quantity are required');
-      return;
+    const handleSave = async () => {
+    // Prevent double submission
+    if (saving) return;
+
+    // Validation
+    if (!formData.item) {
+        setMessage('Please select an item');
+        return;
+    }
+    const qty = parseFloat(formData.adjustment_qty);
+    if (isNaN(qty) || qty === 0) {
+        setMessage('Please enter a valid adjustment quantity (cannot be zero)');
+        return;
     }
 
     setSaving(true);
     setMessage('');
+
     try {
-      const url = `https://${tenant}.agrigrid.net/inventory3/api/stock-adjust/save/`;
+        const url = `https://${tenant}.agrigrid.net/inventory3/api/stock-adjust/save/`;
 
-      const payload = {
-        item_id: formData.item,
-        warehouse_id: formData.warehouse || null,
-        location_id: formData.location || null,
-        batch_number: formData.batch_number || '',
-        serial_number: formData.serial_number || '',
+        const payload = {
+        item_id: parseInt(formData.item),
+        warehouse_id: formData.warehouse ? parseInt(formData.warehouse) : null,
+        location_id: formData.location ? parseInt(formData.location) : null,
+        batch_number: formData.batch_number.trim() || '',
+        serial_number: formData.serial_number.trim() || '',
         expiry_date: formData.expiry_date || null,
-        adjustment_qty: parseFloat(formData.adjustment_qty),
-        notes: formData.notes || '',
-      };
+        adjustment_qty: qty,
+        notes: formData.notes.trim() || '',
+        };
 
-      const res = await fetch(url, {
+        const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         credentials: 'include',
-      });
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (res.ok && data.success) {
+        if (res.ok && data.success) {
         setMessage('Stock adjustment saved successfully!');
         setTimeout(() => navigate(`/dashboard/${tenant}/inventory/adjust`), 1500);
-      } else {
-        setMessage(data.error || 'Save failed');
-      }
+        } else {
+        setMessage(data.error || 'Save failed — check server logs');
+        }
     } catch (err) {
-      setMessage('Network error');
+        console.error('Save error:', err);
+        setMessage('Network error — check connection');
     } finally {
-      setSaving(false);
+        setSaving(false);
     }
-  };
+    };
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
 
@@ -226,6 +237,7 @@ export default function StockAdjustmentForm() {
             Cancel
           </Link>
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
             className="px-12 py-4 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold rounded-xl text-lg transition"
