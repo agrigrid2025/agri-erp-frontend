@@ -106,6 +106,8 @@ export default function EquipmentForm() {
         last_service_date: formData.last_service_date || null,
         next_service_due: formData.next_service_due || null,
         calibration_expiry: formData.calibration_expiry || null,
+        requires_calibration: formData.requires_calibration,
+        is_active: formData.is_active,
       };
 
       const res = await fetch(url, {
