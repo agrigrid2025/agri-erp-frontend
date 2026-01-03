@@ -68,28 +68,16 @@ export default function StockHistory() {
         <table className="min-w-full">
           <thead className="bg-gray-800 text-white">
             <tr>
-              <th
-                onClick={() => handleSort('date')}
-                className="px-6 py-4 text-left cursor-pointer"
-              >
+              <th onClick={() => handleSort('date')} className="px-6 py-4 text-left cursor-pointer">
                 Date {sortField === 'date' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
-              <th
-                onClick={() => handleSort('source')}
-                className="px-6 py-4 text-left cursor-pointer"
-              >
+              <th onClick={() => handleSort('source')} className="px-6 py-4 text-left cursor-pointer">
                 Source {sortField === 'source' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
-              <th
-                onClick={() => handleSort('quantity')}
-                className="px-6 py-4 text-right cursor-pointer"
-              >
+              <th onClick={() => handleSort('quantity')} className="px-6 py-4 text-right cursor-pointer">
                 Quantity {sortField === 'quantity' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
-              <th
-                onClick={() => handleSort('running_total')}
-                className="px-6 py-4 text-right cursor-pointer"
-              >
+              <th onClick={() => handleSort('running_total')} className="px-6 py-4 text-right cursor-pointer">
                 Running Total {sortField === 'running_total' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
               <th className="px-6 py-4 text-left">Notes</th>
@@ -106,7 +94,16 @@ export default function StockHistory() {
               filtered.map(entry => (
                 <tr key={entry.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">{new Date(entry.date).toLocaleString()}</td>
-                  <td className="px-6 py-4">{entry.source}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      entry.source.toLowerCase().includes('receipt') ? 'bg-green-100 text-green-800' :
+                      entry.source.toLowerCase().includes('adjustment') ? 'bg-blue-100 text-blue-800' :
+                      entry.source.toLowerCase().includes('use') || entry.source.toLowerCase().includes('issue') ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {entry.source}
+                    </span>
+                  </td>
                   <td className={`px-6 py-4 text-right font-bold ${entry.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {entry.quantity > 0 ? '+' : ''}{entry.quantity.toFixed(2)}
                   </td>
