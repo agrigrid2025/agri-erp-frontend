@@ -12,16 +12,17 @@ export default function SprayPlanList() {
       .then(data => {
         setPlans(data.plans || []);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [tenant]);
 
-  if (loading) return <div className="text-center py-20">Loading spray plans...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading spray plans...</div>;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Spray Plans</h1>
-        <Link to={`/dashboard/${tenant}/spray/plans/add`} className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+        <Link to={`/dashboard/${tenant}/spray/plans/add`} className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold">
           + New Plan
         </Link>
       </div>
@@ -50,7 +51,7 @@ export default function SprayPlanList() {
                 <tr key={plan.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium">{plan.block}</td>
                   <td className="px-6 py-4">{plan.target_pest}</td>
-                  <td className="px-6 py-4">{new Date(plan.scheduled_date).toLocaleDateString()}</td>
+                  <td className="px-6 py-4">{new Date(plan.scheduled_date).toLocaleString()}</td>
                   <td className="px-6 py-4">{plan.equipment || '—'}</td>
                   <td className="px-6 py-4 text-center">
                     {plan.has_record ? (
@@ -64,8 +65,8 @@ export default function SprayPlanList() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-center space-x-3">
-                    <Link to={`/dashboard/${tenant}/spray/plans/edit/${plan.id}`} className="text-blue-600 hover:underline">
-                      Edit
+                    <Link to={`/dashboard/${tenant}/spray/plans/${plan.id}`} className="text-blue-600 hover:underline">
+                      View
                     </Link>
                     {plan.has_record ? (
                       <Link to={`/dashboard/${tenant}/spray/record/${plan.id}`} className="text-green-600 hover:underline">
@@ -73,7 +74,7 @@ export default function SprayPlanList() {
                       </Link>
                     ) : (
                       <Link to={`/dashboard/${tenant}/spray/record/new/${plan.id}`} className="text-green-600 hover:underline">
-                        Create Record
+                        Record Application
                       </Link>
                     )}
                   </td>

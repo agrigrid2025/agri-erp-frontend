@@ -6,10 +6,10 @@ export default function SprayRecordForm() {
   const navigate = useNavigate();
 
   const [plan, setPlan] = useState(null);
-  const [record, setRecord] = useState(null);
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [equipment, setEquipment] = useState([]);
+  const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -19,9 +19,8 @@ export default function SprayRecordForm() {
     end_time: '',
     applicator: '',
     equipment: '',
-    comments: '',
     weather_notes: '',
-    weather_snapshot: {},
+    comments: '',
   });
 
   useEffect(() => {
@@ -31,7 +30,10 @@ export default function SprayRecordForm() {
         const planJson = await planRes.json();
         const p = planJson.plan;
         setPlan(p);
-        setProducts(p.products);
+        setProducts(p.products.map(prod => ({
+          ...prod,
+          actual_amount: prod.amount,
+        })));
 
         // Load users and equipment
         const [userRes, eqRes] = await Promise.all([
@@ -43,10 +45,13 @@ export default function SprayRecordForm() {
         setUsers(userData.users || []);
         setEquipment(eqData.equipment || []);
 
-        // If record exists, load it
-        if (p.has_record) {
-          // Placeholder — add record detail API when ready
-        }
+        // Load current weather (placeholder)
+        setWeather({
+          temp: 25,
+          rain: 10,
+          wind: 15,
+          humidity: 65,
+        });
       } catch (err) {
         console.error(err);
         setMessage('Failed to load data');
@@ -81,13 +86,13 @@ export default function SprayRecordForm() {
         end_time: formData.end_time,
         applicator: formData.applicator,
         equipment: formData.equipment,
-        comments: formData.comments,
         weather_notes: formData.weather_notes,
-        weather_snapshot: formData.weather_snapshot,
+        comments: formData.comments,
+        weather_snapshot: weather,
         products: products.map(prod => ({
           item_id: prod.item_id,
           planned_amount: prod.amount,
-          actual_amount: prod.actual_amount || prod.amount,
+          actual_amount: prod.actual_amount,
         })),
       };
 
@@ -115,11 +120,34 @@ export default function SprayRecordForm() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Spray Record — {plan?.block_name}</h1>
-      <p className="text-xl text-gray-600 mb-8">Target Pest: {plan?.target_pest}</p>
+      <h1 className="text-3xl font-bold text-center mb-8">Record Spray Application — {plan?.block_name}</h1>
 
-      <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white rounded-2xl shadow-xl border p-8 space-y-12">
+        {weather && (
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-6">
+            <h4 className="text-xl font-bold text-blue-800 text-center mb-4">Current Weather Conditions</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div className="bg-white rounded-xl p-5 shadow">
+                <div className="text-4xl font-bold text-red-600">{weather.temp}°</div>
+                <div className="text-sm text-gray-600 mt-2">Temperature</div>
+              </div>
+              <div className="bg-white rounded-xl p-5 shadow">
+                <div className="text-4xl font-bold text-blue-600">{weather.rain}%</div>
+                <div className="text-sm text-gray-600 mt-2">Rain Chance</div>
+              </div>
+              <div className="bg-white rounded-xl p-5 shadow">
+                <div className="text-4xl font-bold text-gray-700">{weather.wind} km/h</div>
+                <div className="text-sm text-gray-600 mt-2">Wind Speed</div>
+              </div>
+              <div className="bg-white rounded-xl p-5 shadow">
+                <div className="text-4xl font-bold text-purple-600">{weather.humidity}%</div>
+                <div className="text-sm text-gray-600 mt-2">Humidity</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Start Time *</label>
             <input
@@ -142,11 +170,8 @@ export default function SprayRecordForm() {
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Applicator *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Operator *</label>
             <select
               name="applicator"
               value={formData.applicator}
@@ -154,97 +179,96 @@ export default function SprayRecordForm() {
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
             >
-              <option value="">Select applicator</option>
+              <option value="">Select operator</option>
               {users.map(user => (
                 <option key={user.id} value={user.id}>{user.username}</option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Equipment Used</label>
-            <select
-              name="equipment"
-              value={formData.equipment}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-            >
-              <option value="">Select equipment</option>
-              {equipment.map(eq => (
-                <option key={eq.id} value={eq.id}>{eq.name}</option>
-              ))}
-            </select>
+        </div>
+
+        <div className="bg-gray-50 rounded-2xl p-8 border border-gray-300">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">Planned vs Actual Chemicals</h3>
+          <div className="space-y-6">
+            {products.map((prod, index) => (
+              <div key={prod.id} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end bg-white rounded-xl p-6 shadow">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Chemical</label>
+                  <div className="text-lg font-semibold text-gray-800">
+                    {prod.sku} — {prod.name}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Planned (L/ha)</label>
+                  <div className="text-xl font-bold text-blue-700">
+                    {prod.amount.toFixed(3)}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Actual Used (L) *</label>
+                  <input
+                    type="number"
+                    value={prod.actual_amount}
+                    onChange={(e) => updateActualAmount(index, e.target.value)}
+                    step="0.001"
+                    required
+                    className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Weather Notes (Freshcare)</label>
-          <textarea
-            name="weather_notes"
-            value={formData.weather_notes}
+        <div className="bg-emerald-50 rounded-2xl p-8 border-2 border-emerald-200">
+          <label className="block text-xl font-bold text-gray-800 mb-4">Equipment Used *</label>
+          <select
+            name="equipment"
+            value={formData.equipment}
             onChange={handleChange}
-            rows="3"
-            placeholder="Wind, temperature, rain during spray..."
-            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-
-        {/* Products */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Products Used</h2>
-          <table className="min-w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-6 py-3 text-left">Item</th>
-                <th className="px-6 py-3 text-right">Planned Amount</th>
-                <th className="px-6 py-3 text-right">Actual Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {products.map((prod, index) => (
-                <tr key={prod.id}>
-                  <td className="px-6 py-4">
-                    {prod.sku} — {prod.name}
-                  </td>
-                  <td className="px-6 py-4 text-right">{prod.amount.toFixed(3)}</td>
-                  <td className="px-6 py-4">
-                    <input
-                      type="number"
-                      value={prod.actual_amount || ''}
-                      onChange={(e) => updateActualAmount(index, e.target.value)}
-                      step="0.001"
-                      className="w-32 px-3 py-2 border rounded text-right focus:ring-2 focus:ring-green-500"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">General Comments</label>
-          <textarea
-            name="comments"
-            value={formData.comments}
-            onChange={handleChange}
-            rows="4"
-            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-
-        <div className="flex justify-end gap-4 pt-6">
-          <Link
-            to={`/dashboard/${tenant}/spray/plans`}
-            className="px-8 py-4 border border-gray-300 rounded-xl text-lg font-medium hover:bg-gray-50 transition"
+            required
+            className="w-full px-6 py-4 text-lg border-2 border-emerald-300 rounded-xl focus:ring-4 focus:ring-emerald-300 focus:border-emerald-500 bg-white"
           >
-            Cancel
-          </Link>
+            <option value="">-- Select Equipment --</option>
+            {equipment.map(eq => (
+              <option key={eq.id} value={eq.id}>
+                {eq.fleet_number ? `${eq.fleet_number} — ` : ''}{eq.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Weather Notes</label>
+            <textarea
+              name="weather_notes"
+              value={formData.weather_notes}
+              onChange={handleChange}
+              rows="3"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">General Comments</label>
+            <textarea
+              name="comments"
+              value={formData.comments}
+              onChange={handleChange}
+              rows="3"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+        </div>
+
+        <div className="text-center pt-8">
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-12 py-4 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold rounded-xl text-lg transition"
+            className="px-16 py-5 bg-green-600 text-white text-xl font-bold rounded-xl hover:bg-green-700 shadow-2xl transition transform hover:scale-105"
           >
-            {saving ? 'Saving...' : 'Save Record'}
+            {saving ? 'Saving...' : 'Save & Generate Report'}
           </button>
         </div>
 

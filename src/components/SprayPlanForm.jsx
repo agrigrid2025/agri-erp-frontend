@@ -1,25 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
 export default function SprayPlanForm() {
   const { tenant } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isEdit = location.pathname.includes('/edit/');
-  const planId = isEdit ? location.pathname.split('/').pop() : null;
 
-  const [planData, setPlanData] = useState({
+  const [formData, setFormData] = useState({
     block: '',
     target_pest: '',
     scheduled_date: '',
     equipment: '',
     notes: '',
-    products: [], // { item: '', amount: '' }
+    products: [],
   });
 
   const [blocks, setBlocks] = useState([]);
   const [equipment, setEquipment] = useState([]);
   const [items, setItems] = useState([]);
+  const [equipmentStatus, setEquipmentStatus] = useState({});
+  const [forecast, setForecast] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -42,25 +41,6 @@ export default function SprayPlanForm() {
         setBlocks(blockData.blocks || []);
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
-
-        if (isEdit && planId) {
-          const planRes = await fetch(`https://${tenant}.agrigrid.net/spray/api/spray-plan/${planId}/`, { credentials: 'include' });
-          const planJson = await planRes.json();
-          const p = planJson.plan;
-          if (p) {
-            setPlanData({
-              block: p.block_id,
-              target_pest: p.target_pest,
-              scheduled_date: p.scheduled_date.slice(0, 16),
-              equipment: p.equipment_id || '',
-              notes: p.notes,
-              products: p.products.map(prod => ({
-                item: prod.item_id,
-                amount: prod.amount,
-              })),
-            });
-          }
-        }
       } catch (err) {
         console.error(err);
         setMessage('Failed to load data');
@@ -70,28 +50,55 @@ export default function SprayPlanForm() {
     };
 
     loadData();
-  }, [isEdit, planId, tenant]);
+  }, [tenant]);
+
+  const updateForecast = () => {
+    const blockId = formData.block;
+    const scheduled = formData.scheduled_date;
+    if (blockId && scheduled) {
+      fetch(`/spray/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`)
+        .then(r => r.text())
+        .then(html => setForecast(html));
+    } else {
+      setForecast('<p className="text-gray-600">Select block and time above</p>');
+    }
+  };
+
+  const updateEquipmentStatus = () => {
+    const equipId = formData.equipment;
+    if (equipId) {
+      // Placeholder — add real status API when ready
+      setEquipmentStatus({
+        service: 'Good',
+        calibration: 'Good',
+      });
+    } else {
+      setEquipmentStatus({});
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPlanData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'block' || name === 'scheduled_date') updateForecast();
+    if (name === 'equipment') updateEquipmentStatus();
   };
 
   const addProduct = () => {
-    setPlanData(prev => ({
+    setFormData(prev => ({
       ...prev,
       products: [...prev.products, { item: '', amount: '' }],
     }));
   };
 
   const updateProduct = (index, field, value) => {
-    const newProducts = [...planData.products];
+    const newProducts = [...formData.products];
     newProducts[index][field] = value;
-    setPlanData(prev => ({ ...prev, products: newProducts }));
+    setFormData(prev => ({ ...prev, products: newProducts }));
   };
 
   const removeProduct = (index) => {
-    setPlanData(prev => ({
+    setFormData(prev => ({
       ...prev,
       products: prev.products.filter((_, i) => i !== index),
     }));
@@ -101,29 +108,12 @@ export default function SprayPlanForm() {
     setSaving(true);
     setMessage('');
     try {
-      const url = `https://${tenant}.agrigrid.net/spray/api/spray-plan/save/`;
-
-      const payload = {
-        ...planData,
-        id: isEdit ? planId : undefined,
-        products: planData.products.filter(p => p.item && p.amount),
-      };
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        credentials: 'include',
-      });
-      const data = await res.json();
-      if (data.success) {
-        setMessage('Spray plan saved successfully!');
-        setTimeout(() => navigate(`/dashboard/${tenant}/spray/plans`), 1500);
-      } else {
-        setMessage(data.error || 'Save failed');
-      }
+      // Placeholder — add real save API when ready
+      console.log('Saving plan:', formData);
+      setMessage('Spray plan saved successfully! (placeholder)');
+      setTimeout(() => navigate(`/dashboard/${tenant}/spray/plans`), 1500);
     } catch (err) {
-      setMessage('Network error');
+      setMessage('Save failed');
     } finally {
       setSaving(false);
     }
@@ -133,17 +123,15 @@ export default function SprayPlanForm() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">
-        {isEdit ? 'Edit Spray Plan' : 'New Spray Plan'}
-      </h1>
+      <h1 className="text-3xl font-bold mb-8">New Spray Plan</h1>
 
       <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Block *</label>
+            <label className="block font-semibold mb-2 text-green-700">Block / Paddock *</label>
             <select
               name="block"
-              value={planData.block}
+              value={formData.block}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
@@ -155,11 +143,11 @@ export default function SprayPlanForm() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Target Pest *</label>
+            <label className="block font-semibold mb-2 text-red-700">Target Pest / Disease *</label>
             <input
               type="text"
               name="target_pest"
-              value={planData.target_pest}
+              value={formData.target_pest}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
@@ -167,25 +155,15 @@ export default function SprayPlanForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Scheduled Date & Time *</label>
-            <input
-              type="datetime-local"
-              name="scheduled_date"
-              value={planData.scheduled_date}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Equipment</label>
+        <div className="flex items-end gap-6">
+          <div className="flex-1 max-w-md">
+            <label className="block font-semibold mb-3 text-lg text-gray-800">Equipment to Use *</label>
             <select
               name="equipment"
-              value={planData.equipment}
+              value={formData.equipment}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              required
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 text-base"
             >
               <option value="">Select equipment</option>
               {equipment.map(eq => (
@@ -193,83 +171,108 @@ export default function SprayPlanForm() {
               ))}
             </select>
           </div>
+
+          {equipmentStatus.service && (
+            <div className="text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg bg-emerald-400">
+              <div className="text-xs opacity-90">Service</div>
+              <div className="text-base">{equipmentStatus.service}</div>
+            </div>
+          )}
+
+          {equipmentStatus.calibration && (
+            <div className="text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg bg-emerald-400">
+              <div className="text-xs opacity-90">Calibration</div>
+              <div className="text-base">{equipmentStatus.calibration}</div>
+            </div>
+          )}
         </div>
 
-        {/* Products */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Planned Products</h2>
-          <div className="space-y-4">
-            {planData.products.map((prod, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
-                <div className="md:col-span-6">
-                  <select
-                    value={prod.item}
-                    onChange={(e) => updateProduct(index, 'item', e.target.value)}
-                    className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="">Select item</option>
-                    {items.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.sku} — {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-4">
-                  <input
-                    type="number"
-                    value={prod.amount}
-                    onChange={(e) => updateProduct(index, 'amount', e.target.value)}
-                    step="0.001"
-                    placeholder="Amount"
-                    className="w-full px-4 py-3 border rounded-lg text-right focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div className="md:col-span-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() => removeProduct(index)}
-                    className="text-red-600 hover:text-red-800 font-bold"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addProduct}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition"
-            >
-              + Add Product
-            </button>
+        <hr className="my-8 border-green-500" />
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block font-semibold mb-2">Scheduled Date & Time *</label>
+            <input
+              type="datetime-local"
+              name="scheduled_date"
+              value={formData.scheduled_date}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-2">Notes (optional)</label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              rows="4"
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+            />
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-          <textarea
-            name="notes"
-            value={planData.notes}
-            onChange={handleChange}
-            rows="4"
-            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-          />
+        <div className="text-center">
+          <div dangerouslySetInnerHTML={{ __html: forecast || '<p className="text-gray-600">Select block and time above</p>' }} />
         </div>
 
-        <div className="flex justify-end gap-4 pt-6">
-          <Link
-            to={`/dashboard/${tenant}/spray/plans`}
-            className="px-8 py-4 border border-gray-300 rounded-xl text-lg font-medium hover:bg-gray-50 transition"
-          >
+        <hr className="my-8 border-green-500" />
+
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-green-700">Products to Apply</h3>
+          <button type="button" onClick={addProduct} className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow">
+            + Add Product
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {formData.products.map((prod, index) => (
+            <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
+              <div className="md:col-span-8">
+                <select
+                  value={prod.item}
+                  onChange={(e) => updateProduct(index, 'item', e.target.value)}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">Select item</option>
+                  {items.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.sku} — {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-3">
+                <input
+                  type="number"
+                  value={prod.amount}
+                  onChange={(e) => updateProduct(index, 'amount', e.target.value)}
+                  step="0.001"
+                  placeholder="Amount L/ha"
+                  className="w-full px-4 py-3 border rounded-lg text-right focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div className="md:col-span-1 text-center">
+                <button type="button" onClick={() => removeProduct(index)} className="text-red-600 hover:text-red-800 font-bold">
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 flex justify-end gap-4">
+          <Link to={`/dashboard/${tenant}/spray/plans`} className="px-8 py-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
             Cancel
           </Link>
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-12 py-4 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold rounded-xl text-lg transition"
+            className="px-12 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-xl rounded-lg shadow-lg"
           >
-            {saving ? 'Saving...' : 'Save Plan'}
+            {saving ? 'Saving...' : 'Save Spray Plan'}
           </button>
         </div>
 
