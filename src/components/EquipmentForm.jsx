@@ -51,7 +51,7 @@ export default function EquipmentForm() {
             setFormData({
               name: eq.name || '',
               fleet_number: eq.fleet_number || '',
-              equipment_type: eq.type_id || '',  // Use type_id from API
+              equipment_type: eq.type_id || '',  // Use ID from API
               make: eq.make || '',
               model: eq.model || '',
               registration_number: eq.registration_number || '',
