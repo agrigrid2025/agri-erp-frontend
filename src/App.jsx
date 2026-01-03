@@ -54,6 +54,7 @@ import EquipmentTypeList from './components/EquipmentTypeList';
 import EquipmentTypeForm from './components/EquipmentTypeForm';
 import ItemStockAdjustmentForm from './components/ItemStockAdjustmentForm';
 import GeneralStockAdjustment from './components/GeneralStockAdjustment';
+import StockHistory from './components/StockHistory';
 
 
 
