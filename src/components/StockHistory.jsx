@@ -6,18 +6,18 @@ export default function StockHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
-    // Load stock movements for item (add real API when ready)
-    // Placeholder data
-    setHistory([
-      { id: 1, date: '2026-01-01', source: 'Receipt', quantity: 100, running_total: 100 },
-      { id: 2, date: '2026-01-02', source: 'Adjustment', quantity: -10, running_total: 90 },
-      { id: 3, date: '2026-01-03', source: 'Use', quantity: -20, running_total: 70 },
-    ]);
-    setLoading(false);
+    fetch(`https://${tenant}.agrigrid.net/inventory3/api/stock-movements/${itemId}/`, { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        setHistory(data.movements || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [tenant, itemId]);
 
   const handleSort = (field) => {
@@ -40,7 +40,7 @@ export default function StockHistory() {
     entry.source.toLowerCase().includes(filter.toLowerCase())
   );
 
-  if (loading) return <div className="text-center py-20">Loading stock history...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading stock history...</div>;
 
   return (
     <div className="max-w-6xl mx-auto p-6">
