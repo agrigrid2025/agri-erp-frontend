@@ -114,8 +114,8 @@ export default function ItemDetail() {
           Edit Item
         </Link>
         <Link
-          to={`/dashboard/${tenant}/inventory/adjustments/new?item=${item.id}`}
-          className="inline-block px-8 py-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-xl transition"
+          to={`/dashboard/${tenant}/inventory/items/${item.id}/adjust`}
+          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition"
         >
           Adjust Stock
         </Link>
