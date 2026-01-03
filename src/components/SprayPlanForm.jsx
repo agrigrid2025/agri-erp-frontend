@@ -41,6 +41,9 @@ export default function SprayPlanForm() {
         setBlocks(blockData.blocks || []);
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
+
+        // Update equipment status after equipment is loaded
+        updateEquipmentStatus();
       } catch (err) {
         console.error(err);
         setMessage('Failed to load data');
