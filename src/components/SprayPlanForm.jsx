@@ -42,7 +42,6 @@ export default function SprayPlanForm() {
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
 
-        // Update status after equipment loaded
         updateEquipmentStatus();
       } catch (err) {
         console.error(err);
@@ -55,10 +54,6 @@ export default function SprayPlanForm() {
     loadData();
   }, [tenant]);
 
-    useEffect(() => {
-    updateEquipmentStatus();
-  }, [formData.equipment, equipment]);
-
   const updateForecast = () => {
     const blockId = formData.block;
     const scheduled = formData.scheduled_date;
@@ -66,9 +61,9 @@ export default function SprayPlanForm() {
       fetch(`https://${tenant}.agrigrid.net/spray/api/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`, { credentials: 'include' })
         .then(r => r.text())
         .then(html => setForecast(html))
-        .catch(() => setForecast('<p class="text-red-600">Failed to load forecast</p>'));
+        .catch(() => setForecast('<p class="text-red-600 text-center py-8">Failed to load forecast</p>'));
     } else {
-      setForecast('<p class="text-gray-600">Select block and time above</p>');
+      setForecast('<p class="text-gray-600 text-center py-8">Select block and time, then click Update Forecast</p>');
     }
   };
 
@@ -87,7 +82,6 @@ export default function SprayPlanForm() {
 
     const today = new Date();
 
-    // Service status
     let serviceStatus = 'No date set';
     if (equip.next_service_due) {
       const nextService = new Date(equip.next_service_due);
@@ -97,7 +91,6 @@ export default function SprayPlanForm() {
       else serviceStatus = 'Good';
     }
 
-    // Calibration status
     let calStatus = 'No date set';
     if (equip.calibration_expiry) {
       const calExpiry = new Date(equip.calibration_expiry);
@@ -116,7 +109,6 @@ export default function SprayPlanForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (name === 'block' || name === 'scheduled_date') updateForecast();
     if (name === 'equipment') updateEquipmentStatus();
   };
 
@@ -158,20 +150,20 @@ export default function SprayPlanForm() {
   if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">New Spray Plan</h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">New Spray Plan</h1>
 
-      <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="bg-white rounded-3xl shadow-2xl p-10 space-y-10">
+        {/* Block & Target Pest */}
+        <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <label className="block font-semibold mb-2 text-green-700">Block / Paddock *</label>
+            <label className="block text-lg font-semibold text-green-700 mb-3">Block / Paddock *</label>
             <select
               name="block"
               value={formData.block}
               onChange={handleChange}
-              onInput={() => updateForecast()}
               required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             >
               <option value="">Select block</option>
               {blocks.map(block => (
@@ -180,154 +172,187 @@ export default function SprayPlanForm() {
             </select>
           </div>
           <div>
-            <label className="block font-semibold mb-2 text-red-700">Target Pest / Disease *</label>
+            <label className="block text-lg font-semibold text-red-700 mb-3">Target Pest / Disease *</label>
             <input
               type="text"
               name="target_pest"
               value={formData.target_pest}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              placeholder="e.g. Aphids, Powdery Mildew"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
         </div>
 
-        <div className="flex items-end gap-6">
-          <div className="flex-1 max-w-md">
-            <label className="block font-semibold mb-3 text-lg text-gray-800">Equipment to Use *</label>
-            <select
-              name="equipment"
-              value={formData.equipment}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 text-base"
-            >
-              <option value="">Select equipment</option>
-              {equipment.map(eq => (
-                <option key={eq.id} value={eq.id}>{eq.name}</option>
-              ))}
-            </select>
+        {/* Equipment + Status */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-8">
+          <label className="block text-xl font-bold text-gray-800 mb-6">Equipment to Use *</label>
+          <div className="flex flex-wrap items-end gap-6">
+            <div className="flex-1 min-w-80">
+              <select
+                name="equipment"
+                value={formData.equipment}
+                onChange={handleChange}
+                required
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+              >
+                <option value="">Select equipment</option>
+                {equipment.map(eq => (
+                  <option key={eq.id} value={eq.id}>{eq.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {equipmentStatus.service && (
+              <div className={`text-center px-8 py-5 rounded-2xl font-bold text-white shadow-xl ${
+                equipmentStatus.service === 'Good' ? 'bg-emerald-500' :
+                equipmentStatus.service === 'Caution' ? 'bg-amber-500' :
+                equipmentStatus.service === 'Do Not Use' ? 'bg-rose-500' :
+                'bg-gray-500'
+              }`}>
+                <div className="text-sm opacity-90">Service</div>
+                <div className="text-xl">{equipmentStatus.service}</div>
+              </div>
+            )}
+
+            {equipmentStatus.calibration && (
+              <div className={`text-center px-8 py-5 rounded-2xl font-bold text-white shadow-xl ${
+                equipmentStatus.calibration === 'Good' ? 'bg-emerald-500' :
+                equipmentStatus.calibration === 'Caution' ? 'bg-amber-500' :
+                equipmentStatus.calibration === 'Do Not Use' ? 'bg-rose-500' :
+                'bg-gray-500'
+              }`}>
+                <div className="text-sm opacity-90">Calibration</div>
+                <div className="text-xl">{equipmentStatus.calibration}</div>
+              </div>
+            )}
           </div>
-
-          {equipmentStatus.service && (
-            <div className={`text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg ${
-              equipmentStatus.service === 'Good' ? 'bg-emerald-400' :
-              equipmentStatus.service === 'Caution' ? 'bg-amber-400' :
-              equipmentStatus.service === 'Do Not Use' ? 'bg-rose-400' :
-              'bg-gray-400'
-            }`}>
-              <div className="text-xs opacity-90">Service</div>
-              <div className="text-base">{equipmentStatus.service}</div>
-            </div>
-          )}
-
-          {equipmentStatus.calibration && (
-            <div className={`text-center px-6 py-3 rounded-xl font-bold text-white shadow-lg ${
-              equipmentStatus.calibration === 'Good' ? 'bg-emerald-400' :
-              equipmentStatus.calibration === 'Caution' ? 'bg-amber-400' :
-              equipmentStatus.calibration === 'Do Not Use' ? 'bg-rose-400' :
-              'bg-gray-400'
-            }`}>
-              <div className="text-xs opacity-90">Calibration</div>
-              <div className="text-base">{equipmentStatus.calibration}</div>
-            </div>
-          )}
         </div>
 
-        <hr className="my-8 border-green-500" />
-
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* Scheduled + Update Button + Notes */}
+        <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <label className="block font-semibold mb-2">Scheduled Date & Time *</label>
+            <label className="block text-lg font-semibold text-gray-800 mb-3">Scheduled Date & Time *</label>
             <input
               type="datetime-local"
               name="scheduled_date"
               value={formData.scheduled_date}
               onChange={handleChange}
-              onInput={() => updateForecast()}
               required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
+            <button
+              type="button"
+              onClick={updateForecast}
+              className="mt-4 w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg transition"
+            >
+              Update Forecast
+            </button>
           </div>
           <div>
-            <label className="block font-semibold mb-2">Notes (optional)</label>
+            <label className="block text-lg font-semibold text-gray-800 mb-3">Notes (optional)</label>
             <textarea
               name="notes"
               value={formData.notes}
               onChange={handleChange}
-              rows="4"
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              rows="6"
+              placeholder="Additional notes..."
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
         </div>
 
-        <div className="text-center">
-          <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-gray-600">Select block and time above</p>' }} />
+        {/* Forecast Card */}
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
+          <h3 className="text-2xl font-bold text-center text-blue-800 mb-6">Spray Window Forecast</h3>
+          <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-center text-gray-600 py-8">Click Update Forecast to see suitability</p>' }} />
         </div>
 
-        <hr className="my-8 border-green-500" />
+        {/* Products */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl p-10 border-2 border-green-200">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-3xl font-bold text-green-800">Products to Apply</h3>
+            <button
+              type="button"
+              onClick={addProduct}
+              className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-xl shadow-lg transition"
+            >
+              + Add Product
+            </button>
+          </div>
 
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-2xl font-bold text-green-700">Products to Apply</h3>
-          <button type="button" onClick={addProduct} className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow">
-            + Add Product
-          </button>
+          <div className="space-y-6">
+            {formData.products.length === 0 ? (
+              <p className="text-center text-gray-600 py-12">No products added yet</p>
+            ) : (
+              formData.products.map((prod, index) => (
+                <div key={index} className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                  <div className="grid md:grid-cols-12 gap-6 items-end">
+                    <div className="md:col-span-8">
+                      <label className="block text-lg font-semibold text-gray-800 mb-3">Chemical / Product</label>
+                      <select
+                        value={prod.item}
+                        onChange={(e) => updateProduct(index, 'item', e.target.value)}
+                        className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+                      >
+                        <option value="">Select item</option>
+                        {items.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.sku} — {item.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-lg font-semibold text-gray-800 mb-3">Amount (L/ha)</label>
+                      <input
+                        type="number"
+                        value={prod.amount}
+                        onChange={(e) => updateProduct(index, 'amount', e.target.value)}
+                        step="0.001"
+                        placeholder="0.000"
+                        className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl text-right focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+                      />
+                    </div>
+                    <div className="md:col-span-1 text-center">
+                      <button
+                        type="button"
+                        onClick={() => removeProduct(index)}
+                        className="text-4xl text-red-600 hover:text-red-800 font-bold"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {formData.products.map((prod, index) => (
-            <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg items-center">
-              <div className="md:col-span-8">
-                <select
-                  value={prod.item}
-                  onChange={(e) => updateProduct(index, 'item', e.target.value)}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">Select item</option>
-                  {items.map(item => (
-                    <option key={item.id} value={item.id}>
-                      {item.sku} — {item.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="md:col-span-3">
-                <input
-                  type="number"
-                  value={prod.amount}
-                  onChange={(e) => updateProduct(index, 'amount', e.target.value)}
-                  step="0.001"
-                  placeholder="Amount L/ha"
-                  className="w-full px-4 py-3 border rounded-lg text-right focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div className="md:col-span-1 text-center">
-                <button type="button" onClick={() => removeProduct(index)} className="text-red-600 hover:text-red-800 font-bold">
-                  Remove
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 flex justify-end gap-4">
-          <Link to={`/dashboard/${tenant}/spray/plans`} className="px-8 py-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        {/* Actions */}
+        <div className="flex justify-end gap-6 pt-8">
+          <Link
+            to={`/dashboard/${tenant}/spray/plans`}
+            className="px-12 py-5 border-2 border-gray-400 rounded-xl text-xl font-bold text-gray-700 hover:bg-gray-100 transition"
+          >
             Cancel
           </Link>
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-12 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-xl rounded-lg shadow-lg"
+            className="px-16 py-5 bg-green-600 hover:bg-green-700 disabled:opacity-70 text-white font-bold text-2xl rounded-xl shadow-2xl transition transform hover:scale-105"
           >
             {saving ? 'Saving...' : 'Save Spray Plan'}
           </button>
         </div>
 
         {message && (
-          <p className={`text-center text-xl font-medium mt-8 ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`text-center text-2xl font-bold mt-10 ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
             {message}
-          </p>
+          </div>
         )}
       </div>
     </div>
