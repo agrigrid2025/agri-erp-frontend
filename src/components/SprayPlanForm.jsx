@@ -19,8 +19,8 @@ export default function SprayPlanForm() {
   const [items, setItems] = useState([]);
   const [equipmentStatus, setEquipmentStatus] = useState({});
   const [forecastData, setForecastData] = useState(null);
-  const [blockArea, setBlockArea] = useState(0); // ← Area of selected block
-  const [itemStock, setItemStock] = useState({}); // ← {item_id: stock_qty}
+  const [blockArea, setBlockArea] = useState(0);
+  const [itemStock, setItemStock] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -29,7 +29,7 @@ export default function SprayPlanForm() {
     const loadData = async () => {
       try {
         const [blockRes, eqRes, itemRes] = await Promise.all([
-          fetch(`https://${tenant}.agrigrid.net/agrimap/api/blocks/`, { credentials: 'include' }),
+          fetch(`https://${tenant}.agrigrid.net/agrimap/api/map/data/`, { credentials: 'include' }),
           fetch(`https://${tenant}.agrigrid.net/equipment/api/equipment/`, { credentials: 'include' }),
           fetch(`https://${tenant}.agrigrid.net/inventory3/api/items/`, { credentials: 'include' }),
         ]);
@@ -120,8 +120,8 @@ export default function SprayPlanForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
 
     if (name === 'block') {
-      const selectedBlock = blocks.find(b => b.id === value);
-      setBlockArea(selectedBlock?.area_ha || 0);
+      const selectedBlock = blocks.find(b => b.id == value);
+      setBlockArea(selectedBlock?.areaHa || 0);
     }
     if (name === 'equipment') updateEquipmentStatus();
   };
