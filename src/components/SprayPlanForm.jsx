@@ -18,9 +18,9 @@ export default function SprayPlanForm() {
   const [equipment, setEquipment] = useState([]);
   const [items, setItems] = useState([]);
   const [equipmentStatus, setEquipmentStatus] = useState({});
-  const [forecast, setForecast] = useState(null);
-  const [blockArea, setBlockArea] = useState(0); // New state for selected block area_ha
-  const [stockData, setStockData] = useState({}); // New state for item stock {item_id: stock_qty}
+  const [forecastData, setForecastData] = useState(null);
+  const [blockArea, setBlockArea] = useState(0);
+  const [itemStock, setItemStock] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -44,16 +44,6 @@ export default function SprayPlanForm() {
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
 
-        // Fetch stock for all items
-        const stockPromises = itemData.items.map(item =>
-          fetch(`https://${tenant}.agrigrid.net/inventory3/api/stock/${item.id}/`, { credentials: 'include' })
-            .then(r => r.json())
-            .then(data => ({ [item.id]: data.stock || 0 }))
-        );
-
-        const stockResults = await Promise.all(stockPromises);
-        setStockData(stockResults.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
-
         updateEquipmentStatus();
       } catch (err) {
         console.error(err);
@@ -70,12 +60,12 @@ export default function SprayPlanForm() {
     const blockId = formData.block;
     const scheduled = formData.scheduled_date;
     if (blockId && scheduled) {
-      fetch(`https://${tenant}.agrigrid.net/spray/api/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`, { credentials: 'include' })
-        .then(r => r.text())
-        .then(html => setForecast(html))
-        .catch(() => setForecast('<p class="text-red-600">Failed to load forecast</p>'));
+      fetch(`https://${tenant}.agrigrid.net/spray/api/forecast-data/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`, { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => setForecastData(data.forecast || null))
+        .catch(() => setForecastData(null));
     } else {
-      setForecast('<p class="text-gray-600">Select block and time above</p>');
+      setForecastData(null);
     }
   };
 
@@ -123,9 +113,8 @@ export default function SprayPlanForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
     if (name === 'block') {
       const selectedBlock = blocks.find(b => b.id === value);
-      setBlockArea(selectedBlock ? selectedBlock.area_ha : 0);
+      setBlockArea(selectedBlock ? selectedBlock.area_ha || 0 : 0);
     }
-    if (name === 'block' || name === 'scheduled_date') updateForecast();
     if (name === 'equipment') updateEquipmentStatus();
   };
 
@@ -149,6 +138,18 @@ export default function SprayPlanForm() {
     }));
   };
 
+  const getStockStatus = (itemId, amount) => {
+    const stock = itemStock[itemId] || 0;
+    const totalNeeded = amount * blockArea;
+    if (stock >= totalNeeded) return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
+    if (stock > 0) return { text: 'Limited Stock', color: 'text-amber-600 bg-amber-100' };
+    return { text: 'Insufficient Stock', color: 'text-red-600 bg-red-100' };
+  };
+
+  const getTotalNeeded = (amount) => {
+    return (amount * blockArea).toFixed(3);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setMessage('');
@@ -163,19 +164,11 @@ export default function SprayPlanForm() {
     }
   };
 
-  const getStatusColor = (stock, total) => {
-    if (stock >= total) return 'text-green-600';
-    if (stock > 0) return 'text-amber-600';
-    return 'text-red-600';
-  };
-
-  const getStatusText = (stock, total) => {
-    if (stock >= total) return 'In Stock';
-    if (stock > 0) return 'Limited Stock';
-    return 'Insufficient Stock';
-  };
-
   if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
+
+  const suitability = forecastData?.suitability;
+  const target = forecastData?.target;
+  const hourly = forecastData?.hourly || [];
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -292,12 +285,79 @@ export default function SprayPlanForm() {
         </div>
 
         {/* Forecast Card */}
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
-          <h3 className="text-3xl font-bold text-center text-blue-800 mb-8">Spray Window Forecast</h3>
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-center text-gray-600 py-12">Click Update Forecast to see suitability</p>' }} />
+        {forecastData ? (
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
+            <h3 className="text-3xl font-bold text-center text-blue-800 mb-8">Spray Window Forecast</h3>
+            <div className="grid md:grid-cols-2 gap-10">
+              {/* Left: Suitability + Hourly */}
+              <div className="space-y-8">
+                {/* Suitability Score */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+                  <div className="text-7xl font-bold text-blue-700 mb-4">{suitability.score}</div>
+                  <div className="text-3xl font-bold text-blue-800 mb-4">{suitability.rating}</div>
+                  {suitability.warnings.length > 0 && (
+                    <div className="text-red-600 font-semibold">
+                      {suitability.warnings.join(' • ')}
+                    </div>
+                  )}
+                </div>
+
+                {/* Hourly List */}
+                <div className="bg-white rounded-2xl shadow-xl p-6">
+                  <h4 className="text-2xl font-bold text-gray-800 mb-6 text-center">Hourly Window</h4>
+                  <div className="space-y-4">
+                    {hourly.map((h, i) => (
+                      <div key={i} className={`p-5 rounded-xl ${h.is_target ? 'bg-blue-100 border-2 border-blue-400' : 'bg-gray-50'}`}>
+                        <div className="flex justify-between items-center">
+                          <div className="font-mono text-2xl font-bold">{h.time}</div>
+                          <div className="text-right">
+                            <div className="text-4xl font-bold text-gray-800">{h.temp}°</div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {h.rain}% rain • {h.wind}/{h.gust} km/h
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Parameter Cards */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-blue-700">{target.rain}%</div>
+                  <div className="text-lg text-gray-600 mt-2">Rain Chance</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-gray-700">{target.wind}<small className="text-3xl">/{target.gust}</small></div>
+                  <div className="text-lg text-gray-600 mt-2">Wind / Gust (km/h)</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-purple-700">{target.visibility}</div>
+                  <div className="text-lg text-gray-600 mt-2">Visibility (km)</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-yellow-700">UV {target.uv}</div>
+                  <div className="text-lg text-gray-600 mt-2">UV Index</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-indigo-700">{target.cloud}%</div>
+                  <div className="text-lg text-gray-600 mt-2">Cloud Cover</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-green-700">{target.humidity}%</div>
+                  <div className="text-lg text-gray-600 mt-2">Humidity</div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200 text-center">
+            <h3 className="text-3xl font-bold text-blue-800 mb-8">Spray Window Forecast</h3>
+            <p className="text-xl text-gray-600">Select block and time, then click Update Forecast</p>
+          </div>
+        )}
 
         {/* Products */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl p-10 border-2 border-green-200">
@@ -316,47 +376,64 @@ export default function SprayPlanForm() {
             {formData.products.length === 0 ? (
               <p className="text-center text-gray-600 py-16 text-xl">No products added yet</p>
             ) : (
-              formData.products.map((prod, index) => (
-                <div key={index} className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
-                  <div className="grid md:grid-cols-12 gap-6 items-end">
-                    <div className="md:col-span-8">
-                      <label className="block text-lg font-semibold text-gray-800 mb-3">Chemical / Product</label>
-                      <select
-                        value={prod.item}
-                        onChange={(e) => updateProduct(index, 'item', e.target.value)}
-                        className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
-                      >
-                        <option value="">Select item</option>
-                        {items.map(item => (
-                          <option key={item.id} value={item.id}>
-                            {item.sku} — {item.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="md:col-span-3">
-                      <label className="block text-lg font-semibold text-gray-800 mb-3">Amount (L/ha)</label>
-                      <input
-                        type="number"
-                        value={prod.amount}
-                        onChange={(e) => updateProduct(index, 'amount', e.target.value)}
-                        step="0.001"
-                        placeholder="0.000"
-                        className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl text-right focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
-                      />
-                    </div>
-                    <div className="md:col-span-1 text-center">
-                      <button
-                        type="button"
-                        onClick={() => removeProduct(index)}
-                        className="text-5xl text-red-600 hover:text-red-800 font-bold transition"
-                      >
-                        ×
-                      </button>
+              formData.products.map((prod, index) => {
+                const amount = parseFloat(prod.amount) || 0;
+                const totalNeeded = getTotalNeeded(amount);
+                const status = getStockStatus(prod.item, amount);
+                return (
+                  <div key={index} className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+                    <div className="grid md:grid-cols-12 gap-6 items-end">
+                      <div className="md:col-span-6">
+                        <label className="block text-lg font-semibold text-gray-800 mb-3">Chemical / Product</label>
+                        <select
+                          value={prod.item}
+                          onChange={(e) => updateProduct(index, 'item', e.target.value)}
+                          className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+                        >
+                          <option value="">Select item</option>
+                          {items.map(item => (
+                            <option key={item.id} value={item.id}>
+                              {item.sku} — {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-lg font-semibold text-gray-800 mb-3">Amount (L/ha)</label>
+                        <input
+                          type="number"
+                          value={prod.amount}
+                          onChange={(e) => updateProduct(index, 'amount', e.target.value)}
+                          step="0.001"
+                          placeholder="0.000"
+                          className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl text-right focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-lg font-semibold text-gray-800 mb-3">Total Needed (L)</label>
+                        <div className="px-6 py-4 bg-gray-100 rounded-xl text-right text-2xl font-bold text-gray-800">
+                          {totalNeeded}
+                        </div>
+                      </div>
+                      <div className="md:col-span-1">
+                        <label className="block text-lg font-semibold text-gray-800 mb-3">Status</label>
+                        <div className={`px-6 py-4 rounded-xl text-center text-lg font-bold ${status.color}`}>
+                          {status.text}
+                        </div>
+                      </div>
+                      <div className="md:col-span-1 text-center">
+                        <button
+                          type="button"
+                          onClick={() => removeProduct(index)}
+                          className="text-5xl text-red-600 hover:text-red-800 font-bold transition"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
