@@ -63,7 +63,7 @@ export default function SprayPlanForm() {
     const blockId = formData.block;
     const scheduled = formData.scheduled_date;
     if (blockId && scheduled) {
-      fetch(`/spray/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`)
+      fetch(`https://${tenant}.agrigrid.net/spray/api/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`, { credentials: 'include' })
         .then(r => r.text())
         .then(html => setForecast(html))
         .catch(() => setForecast('<p class="text-red-600">Failed to load forecast</p>'));
