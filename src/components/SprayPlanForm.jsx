@@ -169,6 +169,7 @@ export default function SprayPlanForm() {
               name="block"
               value={formData.block}
               onChange={handleChange}
+              onInput={() => updateForecast()}
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
             >
@@ -243,6 +244,7 @@ export default function SprayPlanForm() {
               name="scheduled_date"
               value={formData.scheduled_date}
               onChange={handleChange}
+              onInput={() => updateForecast()}
               required
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
             />
