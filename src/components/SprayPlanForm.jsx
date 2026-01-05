@@ -263,25 +263,40 @@ export default function SprayPlanForm() {
           </div>
         </div>
 
-        {/* Scheduled + Update Button + Notes */}
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            <label className="block text-lg font-semibold text-gray-800 mb-3">Scheduled Date & Time *</label>
-            <input
-              type="datetime-local"
-              name="scheduled_date"
-              value={formData.scheduled_date}
-              onChange={handleChange}
-              required
-              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
-            />
-            <button
-              type="button"
-              onClick={updateForecast}
-              className="mt-6 w-full px-8 py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl rounded-xl shadow-2xl transition"
-            >
-              Update Forecast
-            </button>
+          {/* Scheduled + Update Button + Notes */}
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <label className="block text-lg font-semibold text-gray-800 mb-3">Scheduled Date & Time *</label>
+              <input
+                type="datetime-local"
+                name="scheduled_date"
+                value={formData.scheduled_date}
+                onChange={handleChange}
+                required
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  updateForecast();
+                  updateEquipmentStatus();
+                }}
+                className="mt-6 w-full px-8 py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl rounded-xl shadow-2xl transition"
+              >
+                Update All
+              </button>
+            </div>
+            <div>
+              <label className="block text-lg font-semibold text-gray-800 mb-3">Notes (optional)</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                rows="8"
+                placeholder="Additional notes about the spray plan..."
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-lg font-semibold text-gray-800 mb-3">Notes (optional)</label>
