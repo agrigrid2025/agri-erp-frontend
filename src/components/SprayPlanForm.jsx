@@ -19,8 +19,8 @@ export default function SprayPlanForm() {
   const [items, setItems] = useState([]);
   const [equipmentStatus, setEquipmentStatus] = useState({});
   const [forecastData, setForecastData] = useState(null);
-  const [blockArea, setBlockArea] = useState(0);
-  const [itemStock, setItemStock] = useState({});
+  const [blockArea, setBlockArea] = useState(0); // ← Area of selected block
+  const [itemStock, setItemStock] = useState({}); // ← {item_id: stock_qty}
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -43,6 +43,13 @@ export default function SprayPlanForm() {
         setBlocks(blockData.blocks || []);
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
+
+        // Load current stock for all items (placeholder — replace with real API)
+        const stockMap = {};
+        itemData.items.forEach(item => {
+          stockMap[item.id] = item.currentStock || 0; // Use currentStock from items API if available
+        });
+        setItemStock(stockMap);
 
         updateEquipmentStatus();
       } catch (err) {
@@ -111,9 +118,10 @@ export default function SprayPlanForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+
     if (name === 'block') {
-      const selectedBlock = blocks.find(b => b.id === value);
-      setBlockArea(selectedBlock ? selectedBlock.area_ha || 0 : 0);
+      const selectedBlock = blocks.find(b => b.id == value);
+      setBlockArea(selectedBlock?.area_ha || 0);
     }
     if (name === 'equipment') updateEquipmentStatus();
   };
@@ -139,6 +147,9 @@ export default function SprayPlanForm() {
   };
 
   const getStockStatus = (itemId, amount) => {
+    if (!itemId || !amount) {
+      return { text: '—', color: 'text-gray-500 bg-gray-100' };
+    }
     const stock = itemStock[itemId] || 0;
     const totalNeeded = amount * blockArea;
     if (stock >= totalNeeded) return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
@@ -147,6 +158,7 @@ export default function SprayPlanForm() {
   };
 
   const getTotalNeeded = (amount) => {
+    if (!amount || blockArea === 0) return '—';
     return (amount * blockArea).toFixed(3);
   };
 
