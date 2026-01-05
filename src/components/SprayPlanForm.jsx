@@ -18,7 +18,7 @@ export default function SprayPlanForm() {
   const [equipment, setEquipment] = useState([]);
   const [items, setItems] = useState([]);
   const [equipmentStatus, setEquipmentStatus] = useState({});
-  const [forecast, setForecast] = useState(null);
+  const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -52,18 +52,18 @@ export default function SprayPlanForm() {
     };
 
     loadData();
-  }, [tenant, formData.equipment]);
+  }, [tenant]);
 
   const updateForecast = () => {
     const blockId = formData.block;
     const scheduled = formData.scheduled_date;
     if (blockId && scheduled) {
-      fetch(`https://${tenant}.agrigrid.net/spray/api/forecast-preview/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`, { credentials: 'include' })
-        .then(r => r.text())
-        .then(html => setForecast(html))
-        .catch(() => setForecast('<p class="text-red-600 text-center py-8">Failed to load forecast</p>'));
+      fetch(`https://${tenant}.agrigrid.net/spray/api/forecast-data/?block=${blockId}&scheduled_date=${encodeURIComponent(scheduled)}`, { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => setForecastData(data.forecast || null))
+        .catch(() => setForecastData(null));
     } else {
-      setForecast('<p class="text-gray-600 text-center py-8">Select block and time, then click Update Forecast</p>');
+      setForecastData(null);
     }
   };
 
@@ -109,7 +109,6 @@ export default function SprayPlanForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (name === 'block' || name === 'scheduled_date') updateForecast();
     if (name === 'equipment') updateEquipmentStatus();
   };
 
@@ -137,7 +136,6 @@ export default function SprayPlanForm() {
     setSaving(true);
     setMessage('');
     try {
-      // Placeholder — add real save API when ready
       console.log('Saving plan:', formData);
       setMessage('Spray plan saved successfully! (placeholder)');
       setTimeout(() => navigate(`/dashboard/${tenant}/spray/plans`), 1500);
@@ -149,6 +147,10 @@ export default function SprayPlanForm() {
   };
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading form...</div>;
+
+  const suitability = forecastData?.suitability;
+  const target = forecastData?.target;
+  const hourly = forecastData?.hourly || [];
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -265,69 +267,79 @@ export default function SprayPlanForm() {
         </div>
 
         {/* Forecast Card */}
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
-          <h3 className="text-3xl font-bold text-center text-blue-800 mb-8">Spray Window Forecast</h3>
-          <div className="grid md:grid-cols-2 gap-10">
-            {/* Left: Suitability Score + Hourly List */}
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                <div className="text-6xl font-bold text-blue-700 mb-4">{forecastScore || '--'}</div>
-                <div className="text-2xl font-bold text-blue-800 mb-2">{forecastRating || 'Select block and time'}</div>
-                {forecastWarnings.length > 0 && (
-                  <div className="text-red-600 text-sm mt-4">
-                    {forecastWarnings.join(' • ')}
-                  </div>
-                )}
-              </div>
+        {forecastData ? (
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
+            <h3 className="text-3xl font-bold text-center text-blue-800 mb-8">Spray Window Forecast</h3>
+            <div className="grid md:grid-cols-2 gap-10">
+              {/* Left: Suitability + Hourly */}
+              <div className="space-y-8">
+                {/* Suitability Score */}
+                <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+                  <div className="text-7xl font-bold text-blue-700 mb-4">{suitability.score}</div>
+                  <div className="text-3xl font-bold text-blue-800 mb-4">{suitability.rating}</div>
+                  {suitability.warnings.length > 0 && (
+                    <div className="text-red-600 font-semibold">
+                      {suitability.warnings.join(' • ')}
+                    </div>
+                  )}
+                </div>
 
-              {/* Hourly Forecast List */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h4 className="text-xl font-bold text-gray-800 mb-4 text-center">Hourly Window</h4>
-                <div className="space-y-3">
-                  {hourlyForecast.map((h, i) => (
-                    <div key={i} className={`p-4 rounded-xl ${h.is_target ? 'bg-blue-100 border-2 border-blue-400' : 'bg-gray-50'}`}>
-                      <div className="flex justify-between items-center">
-                        <div className="font-mono font-bold text-lg">{h.time}</div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-gray-800">{h.temp}°</div>
-                          <div className="text-sm text-gray-600">{h.rain}% rain • {h.wind}/{h.gust} km/h</div>
+                {/* Hourly List */}
+                <div className="bg-white rounded-2xl shadow-xl p-6">
+                  <h4 className="text-2xl font-bold text-gray-800 mb-6 text-center">Hourly Window</h4>
+                  <div className="space-y-4">
+                    {hourly.map((h, i) => (
+                      <div key={i} className={`p-5 rounded-xl ${h.is_target ? 'bg-blue-100 border-2 border-blue-400' : 'bg-gray-50'}`}>
+                        <div className="flex justify-between items-center">
+                          <div className="font-mono text-2xl font-bold">{h.time}</div>
+                          <div className="text-right">
+                            <div className="text-4xl font-bold text-gray-800">{h.temp}°</div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {h.rain}% rain • {h.wind}/{h.gust} km/h
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Parameter Cards */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-blue-700">{target.rain}%</div>
+                  <div className="text-lg text-gray-600 mt-2">Rain Chance</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-gray-700">{target.wind}<small className="text-3xl">/{target.gust}</small></div>
+                  <div className="text-lg text-gray-600 mt-2">Wind / Gust (km/h)</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-purple-700">{target.visibility}</div>
+                  <div className="text-lg text-gray-600 mt-2">Visibility (km)</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-yellow-700">UV {target.uv}</div>
+                  <div className="text-lg text-gray-600 mt-2">UV Index</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-indigo-700">{target.cloud}%</div>
+                  <div className="text-lg text-gray-600 mt-2">Cloud Cover</div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                  <div className="text-5xl font-bold text-green-700">{target.humidity}%</div>
+                  <div className="text-lg text-gray-600 mt-2">Humidity</div>
                 </div>
               </div>
             </div>
-
-            {/* Right: Parameter Cards */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-                <div className="text-3xl font-bold text-blue-700">{targetRain}%</div>
-                <div className="text-sm text-gray-600 mt-2">Rain Chance</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-                <div className="text-3xl font-bold text-gray-700">{targetWind}<small className="text-xl">/{targetGust}</small></div>
-                <div className="text-sm text-gray-600 mt-2">Wind / Gust (km/h)</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-                <div className="text-3xl font-bold text-purple-700">{targetVisibility}</div>
-                <div className="text-sm text-gray-600 mt-2">Visibility (km)</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-                <div className="text-3xl font-bold text-yellow-700">UV {targetUV}</div>
-                <div className="text-sm text-gray-600 mt-2">UV Index</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-                <div className="text-3xl font-bold text-indigo-700">{targetCloud}%</div>
-                <div className="text-sm text-gray-600 mt-2">Cloud Cover</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-                <div className="text-3xl font-bold text-green-700">{targetHumidity}%</div>
-                <div className="text-sm text-gray-600 mt-2">Humidity</div>
-              </div>
-            </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200 text-center">
+            <h3 className="text-3xl font-bold text-blue-800 mb-8">Spray Window Forecast</h3>
+            <p className="text-xl text-gray-600">Select block and time, then click Update Forecast</p>
+          </div>
+        )}
 
         {/* Products */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl p-10 border-2 border-green-200">
