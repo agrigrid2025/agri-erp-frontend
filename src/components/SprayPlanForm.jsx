@@ -19,8 +19,8 @@ export default function SprayPlanForm() {
   const [items, setItems] = useState([]);
   const [equipmentStatus, setEquipmentStatus] = useState({});
   const [forecastData, setForecastData] = useState(null);
-  const [blockArea, setBlockArea] = useState(0); // ← Area of selected block
-  const [itemStock, setItemStock] = useState({}); // ← {item_id: stock_qty}
+  const [blockArea, setBlockArea] = useState(0);
+  const [itemStock, setItemStock] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -44,10 +44,10 @@ export default function SprayPlanForm() {
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
 
-        // Load current stock for all items (placeholder — replace with real API)
+        // Load stock from items API (assuming it has currentStock)
         const stockMap = {};
         itemData.items.forEach(item => {
-          stockMap[item.id] = item.currentStock || 0; // Use currentStock from items API if available
+          stockMap[item.id] = item.currentStock || 0;
         });
         setItemStock(stockMap);
 
@@ -146,20 +146,18 @@ export default function SprayPlanForm() {
     }));
   };
 
+  const getTotalNeeded = (amount) => {
+    if (!amount || blockArea === 0) return '—';
+    return (parseFloat(amount) * blockArea).toFixed(3);
+  };
+
   const getStockStatus = (itemId, amount) => {
-    if (!itemId || !amount) {
-      return { text: '—', color: 'text-gray-500 bg-gray-100' };
-    }
+    if (!itemId || !amount) return { text: '—', color: 'text-gray-500 bg-gray-100' };
     const stock = itemStock[itemId] || 0;
-    const totalNeeded = amount * blockArea;
+    const totalNeeded = parseFloat(amount) * blockArea;
     if (stock >= totalNeeded) return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
     if (stock > 0) return { text: 'Limited Stock', color: 'text-amber-600 bg-amber-100' };
     return { text: 'Insufficient Stock', color: 'text-red-600 bg-red-100' };
-  };
-
-  const getTotalNeeded = (amount) => {
-    if (!amount || blockArea === 0) return '—';
-    return (amount * blockArea).toFixed(3);
   };
 
   const handleSave = async () => {
@@ -263,40 +261,28 @@ export default function SprayPlanForm() {
           </div>
         </div>
 
-          {/* Scheduled + Update Button + Notes */}
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <label className="block text-lg font-semibold text-gray-800 mb-3">Scheduled Date & Time *</label>
-              <input
-                type="datetime-local"
-                name="scheduled_date"
-                value={formData.scheduled_date}
-                onChange={handleChange}
-                required
-                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  updateForecast();
-                  updateEquipmentStatus();
-                }}
-                className="mt-6 w-full px-8 py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl rounded-xl shadow-2xl transition"
-              >
-                Update All
-              </button>
-            </div>
-            <div>
-              <label className="block text-lg font-semibold text-gray-800 mb-3">Notes (optional)</label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows="8"
-                placeholder="Additional notes about the spray plan..."
-                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
-              />
-            </div>
+        {/* Scheduled + Update All Button + Notes */}
+        <div className="grid md:grid-cols-2 gap-8">
+          <div>
+            <label className="block text-lg font-semibold text-gray-800 mb-3">Scheduled Date & Time *</label>
+            <input
+              type="datetime-local"
+              name="scheduled_date"
+              value={formData.scheduled_date}
+              onChange={handleChange}
+              required
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                updateForecast();
+                updateEquipmentStatus();
+              }}
+              className="mt-6 w-full px-8 py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl rounded-xl shadow-2xl transition"
+            >
+              Update All
+            </button>
           </div>
           <div>
             <label className="block text-lg font-semibold text-gray-800 mb-3">Notes (optional)</label>
@@ -382,7 +368,7 @@ export default function SprayPlanForm() {
         ) : (
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200 text-center">
             <h3 className="text-3xl font-bold text-blue-800 mb-8">Spray Window Forecast</h3>
-            <p className="text-xl text-gray-600">Select block and time, then click Update Forecast</p>
+            <p className="text-xl text-gray-600">Select block and time, then click Update All</p>
           </div>
         )}
 
