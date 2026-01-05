@@ -267,7 +267,66 @@ export default function SprayPlanForm() {
         {/* Forecast Card */}
         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
           <h3 className="text-3xl font-bold text-center text-blue-800 mb-8">Spray Window Forecast</h3>
-          <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-center text-gray-600 py-12">Click Update Forecast to see suitability</p>' }} />
+          <div className="grid md:grid-cols-2 gap-10">
+            {/* Left: Suitability Score + Hourly List */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+                <div className="text-6xl font-bold text-blue-700 mb-4">{forecastScore || '--'}</div>
+                <div className="text-2xl font-bold text-blue-800 mb-2">{forecastRating || 'Select block and time'}</div>
+                {forecastWarnings.length > 0 && (
+                  <div className="text-red-600 text-sm mt-4">
+                    {forecastWarnings.join(' • ')}
+                  </div>
+                )}
+              </div>
+
+              {/* Hourly Forecast List */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h4 className="text-xl font-bold text-gray-800 mb-4 text-center">Hourly Window</h4>
+                <div className="space-y-3">
+                  {hourlyForecast.map((h, i) => (
+                    <div key={i} className={`p-4 rounded-xl ${h.is_target ? 'bg-blue-100 border-2 border-blue-400' : 'bg-gray-50'}`}>
+                      <div className="flex justify-between items-center">
+                        <div className="font-mono font-bold text-lg">{h.time}</div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-gray-800">{h.temp}°</div>
+                          <div className="text-sm text-gray-600">{h.rain}% rain • {h.wind}/{h.gust} km/h</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Parameter Cards */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div className="text-3xl font-bold text-blue-700">{targetRain}%</div>
+                <div className="text-sm text-gray-600 mt-2">Rain Chance</div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div className="text-3xl font-bold text-gray-700">{targetWind}<small className="text-xl">/{targetGust}</small></div>
+                <div className="text-sm text-gray-600 mt-2">Wind / Gust (km/h)</div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div className="text-3xl font-bold text-purple-700">{targetVisibility}</div>
+                <div className="text-sm text-gray-600 mt-2">Visibility (km)</div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div className="text-3xl font-bold text-yellow-700">UV {targetUV}</div>
+                <div className="text-sm text-gray-600 mt-2">UV Index</div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div className="text-3xl font-bold text-indigo-700">{targetCloud}%</div>
+                <div className="text-sm text-gray-600 mt-2">Cloud Cover</div>
+              </div>
+              <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div className="text-3xl font-bold text-green-700">{targetHumidity}%</div>
+                <div className="text-sm text-gray-600 mt-2">Humidity</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Products */}
