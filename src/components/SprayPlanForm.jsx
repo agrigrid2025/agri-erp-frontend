@@ -42,7 +42,7 @@ export default function SprayPlanForm() {
         setEquipment(eqData.equipment || []);
         setItems(itemData.items || []);
 
-        updateEquipmentStatus();
+        updateEquipmentStatus(); // ← Call after loading
       } catch (err) {
         console.error(err);
         setMessage('Failed to load data');
@@ -52,7 +52,7 @@ export default function SprayPlanForm() {
     };
 
     loadData();
-  }, [tenant]);
+  }, [tenant, formData.equipment, equipment]);
 
   const updateForecast = () => {
     const blockId = formData.block;
