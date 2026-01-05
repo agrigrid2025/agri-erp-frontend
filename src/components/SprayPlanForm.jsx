@@ -186,9 +186,9 @@ export default function SprayPlanForm() {
         </div>
 
         {/* Equipment + Status */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-8">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl p-10 border-2 border-blue-200">
           <label className="block text-xl font-bold text-gray-800 mb-6">Equipment to Use *</label>
-          <div className="flex flex-wrap items-end gap-6">
+          <div className="flex flex-wrap items-end gap-8">
             <div className="flex-1 min-w-80">
               <select
                 name="equipment"
@@ -205,26 +205,26 @@ export default function SprayPlanForm() {
             </div>
 
             {equipmentStatus.service && (
-              <div className={`text-center px-8 py-5 rounded-2xl font-bold text-white shadow-xl ${
+              <div className={`text-center px-8 py-6 rounded-2xl font-bold text-white shadow-xl transition-all ${
                 equipmentStatus.service === 'Good' ? 'bg-emerald-500' :
                 equipmentStatus.service === 'Caution' ? 'bg-amber-500' :
                 equipmentStatus.service === 'Do Not Use' ? 'bg-rose-500' :
                 'bg-gray-500'
               }`}>
                 <div className="text-sm opacity-90">Service</div>
-                <div className="text-xl">{equipmentStatus.service}</div>
+                <div className="text-2xl mt-1">{equipmentStatus.service}</div>
               </div>
             )}
 
             {equipmentStatus.calibration && (
-              <div className={`text-center px-8 py-5 rounded-2xl font-bold text-white shadow-xl ${
+              <div className={`text-center px-8 py-6 rounded-2xl font-bold text-white shadow-xl transition-all ${
                 equipmentStatus.calibration === 'Good' ? 'bg-emerald-500' :
                 equipmentStatus.calibration === 'Caution' ? 'bg-amber-500' :
                 equipmentStatus.calibration === 'Do Not Use' ? 'bg-rose-500' :
                 'bg-gray-500'
               }`}>
                 <div className="text-sm opacity-90">Calibration</div>
-                <div className="text-xl">{equipmentStatus.calibration}</div>
+                <div className="text-2xl mt-1">{equipmentStatus.calibration}</div>
               </div>
             )}
           </div>
@@ -245,7 +245,7 @@ export default function SprayPlanForm() {
             <button
               type="button"
               onClick={updateForecast}
-              className="mt-4 w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg transition"
+              className="mt-6 w-full px-8 py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl rounded-xl shadow-2xl transition"
             >
               Update Forecast
             </button>
@@ -256,8 +256,8 @@ export default function SprayPlanForm() {
               name="notes"
               value={formData.notes}
               onChange={handleChange}
-              rows="6"
-              placeholder="Additional notes..."
+              rows="8"
+              placeholder="Additional notes about the spray plan..."
               className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
@@ -265,8 +265,8 @@ export default function SprayPlanForm() {
 
         {/* Forecast Card */}
         <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl p-10 border-2 border-blue-200">
-          <h3 className="text-2xl font-bold text-center text-blue-800 mb-6">Spray Window Forecast</h3>
-          <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-center text-gray-600 py-8">Click Update Forecast to see suitability</p>' }} />
+          <h3 className="text-3xl font-bold text-center text-blue-800 mb-8">Spray Window Forecast</h3>
+          <div dangerouslySetInnerHTML={{ __html: forecast || '<p class="text-center text-gray-600 py-12">Click Update Forecast to see suitability</p>' }} />
         </div>
 
         {/* Products */}
@@ -276,18 +276,18 @@ export default function SprayPlanForm() {
             <button
               type="button"
               onClick={addProduct}
-              className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-xl shadow-lg transition"
+              className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-xl shadow-2xl transition"
             >
               + Add Product
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {formData.products.length === 0 ? (
-              <p className="text-center text-gray-600 py-12">No products added yet</p>
+              <p className="text-center text-gray-600 py-16 text-xl">No products added yet</p>
             ) : (
               formData.products.map((prod, index) => (
-                <div key={index} className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+                <div key={index} className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
                   <div className="grid md:grid-cols-12 gap-6 items-end">
                     <div className="md:col-span-8">
                       <label className="block text-lg font-semibold text-gray-800 mb-3">Chemical / Product</label>
@@ -319,7 +319,7 @@ export default function SprayPlanForm() {
                       <button
                         type="button"
                         onClick={() => removeProduct(index)}
-                        className="text-4xl text-red-600 hover:text-red-800 font-bold"
+                        className="text-5xl text-red-600 hover:text-red-800 font-bold transition"
                       >
                         ×
                       </button>
@@ -332,10 +332,10 @@ export default function SprayPlanForm() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-6 pt-8">
+        <div className="flex justify-end gap-8 pt-10">
           <Link
             to={`/dashboard/${tenant}/spray/plans`}
-            className="px-12 py-5 border-2 border-gray-400 rounded-xl text-xl font-bold text-gray-700 hover:bg-gray-100 transition"
+            className="px-14 py-6 border-2 border-gray-400 rounded-xl text-2xl font-bold text-gray-700 hover:bg-gray-100 transition"
           >
             Cancel
           </Link>
@@ -343,14 +343,14 @@ export default function SprayPlanForm() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-16 py-5 bg-green-600 hover:bg-green-700 disabled:opacity-70 text-white font-bold text-2xl rounded-xl shadow-2xl transition transform hover:scale-105"
+            className="px-20 py-6 bg-green-600 hover:bg-green-700 disabled:opacity-70 text-white font-bold text-3xl rounded-xl shadow-2xl transition transform hover:scale-105"
           >
             {saving ? 'Saving...' : 'Save Spray Plan'}
           </button>
         </div>
 
         {message && (
-          <div className={`text-center text-2xl font-bold mt-10 ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`text-center text-3xl font-bold mt-12 ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
             {message}
           </div>
         )}
