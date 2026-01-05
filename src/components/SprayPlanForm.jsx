@@ -19,8 +19,8 @@ export default function SprayPlanForm() {
   const [items, setItems] = useState([]);
   const [equipmentStatus, setEquipmentStatus] = useState({});
   const [forecastData, setForecastData] = useState(null);
-  const [blockArea, setBlockArea] = useState(0);
-  const [itemStock, setItemStock] = useState({});
+  const [blockArea, setBlockArea] = useState(0); // ← Area of selected block
+  const [itemStock, setItemStock] = useState({}); // ← {item_id: stock_qty}
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -120,7 +120,7 @@ export default function SprayPlanForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
 
     if (name === 'block') {
-      const selectedBlock = blocks.find(b => b.id == value);
+      const selectedBlock = blocks.find(b => b.id === value);
       setBlockArea(selectedBlock?.area_ha || 0);
     }
     if (name === 'equipment') updateEquipmentStatus();
@@ -152,7 +152,7 @@ export default function SprayPlanForm() {
   };
 
   const getStockStatus = (itemId, amount) => {
-    if (!itemId || !amount) return { text: '—', color: 'text-gray-500 bg-gray-100' };
+    if (!itemId || !amount || blockArea === 0) return { text: '—', color: 'text-gray-500 bg-gray-100' };
     const stock = itemStock[itemId] || 0;
     const totalNeeded = parseFloat(amount) * blockArea;
     if (stock >= totalNeeded) return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
