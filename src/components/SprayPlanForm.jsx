@@ -52,7 +52,7 @@ export default function SprayPlanForm() {
     };
 
     loadData();
-  }, [tenant]);
+  }, [tenant, formData.equipment]);
 
   const updateForecast = () => {
     const blockId = formData.block;
@@ -109,6 +109,7 @@ export default function SprayPlanForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'block' || name === 'scheduled_date') updateForecast();
     if (name === 'equipment') updateEquipmentStatus();
   };
 
