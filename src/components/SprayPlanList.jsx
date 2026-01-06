@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronDownIcon, FilterIcon, XIcon } from '@heroicons/react/solid'; // Install @heroicons/react if not
+import { FunnelIcon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'; // ← Correct v2 import
 
 export default function SprayPlanList() {
   const { tenant } = useParams();
@@ -90,7 +90,7 @@ export default function SprayPlanList() {
         onClick={() => setOpenFilter(openFilter === title ? null : title)}
         className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
       >
-        <FilterIcon className="h-5 w-5 text-gray-600" />
+        <FunnelIcon className="h-5 w-5 text-gray-600" />
         <span className="text-sm font-medium">{title}</span>
         {selected.length > 0 && (
           <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded-full">{selected.length}</span>
