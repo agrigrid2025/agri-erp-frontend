@@ -126,7 +126,7 @@ export default function SprayPlanForm() {
 
     if (name === 'block') {
       const selectedBlock = blocks.find(b => b.id == value);
-      setBlockArea(selectedBlock?.hectares || 0);
+      setBlockArea(selectedBlock?.area_ha || 0);
     }
     if (name === 'equipment') updateEquipmentStatus();
   };
