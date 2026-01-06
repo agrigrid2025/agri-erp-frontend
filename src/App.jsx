@@ -60,6 +60,7 @@ import SprayPlanForm from './components/SprayPlanForm';
 import SprayRecordForm from './components/SprayRecordForm';
 import SprayRecordDetail from './components/SprayRecordDetail';
 import SprayPlanDetail from './components/SprayPlanDetail';
+import SprayReport from './components/SprayReport';
 
 
 
@@ -179,6 +180,7 @@ function App() {
             <Route path="spray/record/new/:planId" element={<SprayRecordForm />} />
             <Route path="spray/record/:recordId" element={<SprayRecordDetail />} />
             <Route path="spray/plans/:planId" element={<SprayPlanDetail />} />
+            <Route path="spray/report" element={<SprayReport />} />
           
 
           </Route>

@@ -151,6 +151,7 @@ export default function Layout() {
           {/* AgriSpray */}
           <SidebarSection title="AgriSpray" icon="🌫️" defaultOpen={false}>
             <SidebarLink to="spray/plans" label="Spray Plans" />
+            <SidebarLink to="spray/report" label="Freshcare Report" />
           </SidebarSection>
 
           {/* Equipment */}
