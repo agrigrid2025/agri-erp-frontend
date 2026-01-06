@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import { ChevronDownIcon, FilterIcon, XIcon } from '@heroicons/react/solid'; // Install @heroicons/react if not
 
 export default function SprayPlanList() {
   const { tenant } = useParams();
@@ -18,7 +16,10 @@ export default function SprayPlanList() {
   const [equipmentFilter, setEquipmentFilter] = useState([]);
   const [applicatorFilter, setApplicatorFilter] = useState([]);
 
-  // Unique values for filters
+  // Dropdown open states
+  const [openFilter, setOpenFilter] = useState(null); // 'block', 'pest', 'equipment', 'applicator'
+
+  // Unique values
   const [uniqueBlocks, setUniqueBlocks] = useState([]);
   const [uniquePests, setUniquePests] = useState([]);
   const [uniqueEquipment, setUniqueEquipment] = useState([]);
@@ -35,15 +36,10 @@ export default function SprayPlanList() {
         setFilteredPlans(planList);
 
         // Extract unique values
-        const blocks = [...new Set(planList.map(p => p.block))].sort();
-        const pests = [...new Set(planList.map(p => p.target_pest))].sort();
-        const equip = [...new Set(planList.map(p => p.equipment || 'None'))].sort();
-        const apps = [...new Set(planList.map(p => p.applicator_name || 'None'))].sort();
-
-        setUniqueBlocks(blocks);
-        setUniquePests(pests);
-        setUniqueEquipment(equip);
-        setUniqueApplicators(apps);
+        setUniqueBlocks([...new Set(planList.map(p => p.block))].sort());
+        setUniquePests([...new Set(planList.map(p => p.target_pest))].sort());
+        setUniqueEquipment([...new Set(planList.map(p => p.equipment || 'None'))].sort());
+        setUniqueApplicators([...new Set(planList.map(p => p.applicator_name || 'None'))].sort());
       } catch (err) {
         console.error(err);
       } finally {
@@ -62,67 +58,65 @@ export default function SprayPlanList() {
       filtered = filtered.filter(p => !p.has_record);
     }
 
-    if (blockFilter.length > 0) {
-      filtered = filtered.filter(p => blockFilter.includes(p.block));
-    }
-    if (pestFilter.length > 0) {
-      filtered = filtered.filter(p => pestFilter.includes(p.target_pest));
-    }
-    if (equipmentFilter.length > 0) {
-      filtered = filtered.filter(p => equipmentFilter.includes(p.equipment || 'None'));
-    }
-    if (applicatorFilter.length > 0) {
-      filtered = filtered.filter(p => applicatorFilter.includes(p.applicator_name || 'None'));
-    }
+    if (blockFilter.length > 0) filtered = filtered.filter(p => blockFilter.includes(p.block));
+    if (pestFilter.length > 0) filtered = filtered.filter(p => pestFilter.includes(p.target_pest));
+    if (equipmentFilter.length > 0) filtered = filtered.filter(p => equipmentFilter.includes(p.equipment || 'None'));
+    if (applicatorFilter.length > 0) filtered = filtered.filter(p => applicatorFilter.includes(p.applicator_name || 'None'));
 
     setFilteredPlans(filtered);
   }, [plans, hideCompleted, blockFilter, pestFilter, equipmentFilter, applicatorFilter]);
 
-  const toggleFilter = (filterArray, setFilter, value) => {
-    setFilter(prev => 
+  const toggleFilter = (array, setArray, value) => {
+    setArray(prev => 
       prev.includes(value) 
         ? prev.filter(v => v !== value)
         : [...prev, value]
     );
   };
 
-  // Export to PDF
-  const exportToPDF = () => {
-    const doc = new jsPDF('l', 'mm', 'a4');
-    doc.text('Spray Plans Report', 14, 15);
-
-    const tableData = filteredPlans.map(p => [
-      p.block,
-      p.target_pest,
-      new Date(p.scheduled_date).toLocaleDateString(),
-      p.equipment || '—',
-      p.has_record ? 'Completed' : 'Planned'
-    ]);
-
-    doc.autoTable({
-      head: [['Block', 'Target Pest', 'Scheduled', 'Equipment', 'Status']],
-      body: tableData,
-      startY: 25,
-    });
-
-    doc.save('spray-plans.pdf');
+  const clearFilters = () => {
+    setHideCompleted(false);
+    setBlockFilter([]);
+    setPestFilter([]);
+    setEquipmentFilter([]);
+    setApplicatorFilter([]);
   };
 
-  // Export to Excel
-  const exportToExcel = () => {
-    const wsData = filteredPlans.map(p => ({
-      Block: p.block,
-      'Target Pest': p.target_pest,
-      Scheduled: new Date(p.scheduled_date).toLocaleDateString(),
-      Equipment: p.equipment || '—',
-      Status: p.has_record ? 'Completed' : 'Planned'
-    }));
+  const activeFilterCount = hideCompleted + blockFilter.length + pestFilter.length + equipmentFilter.length + applicatorFilter.length;
 
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Spray Plans');
-    XLSX.writeFile(wb, 'spray-plans.xlsx');
-  };
+  const FilterDropdown = ({ title, options, selected, setSelected }) => (
+    <div className="relative">
+      <button
+        onClick={() => setOpenFilter(openFilter === title ? null : title)}
+        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+      >
+        <FilterIcon className="h-5 w-5 text-gray-600" />
+        <span className="text-sm font-medium">{title}</span>
+        {selected.length > 0 && (
+          <span className="px-2 py-1 bg-indigo-600 text-white text-xs rounded-full">{selected.length}</span>
+        )}
+        <ChevronDownIcon className={`h-4 w-4 transition ${openFilter === title ? 'rotate-180' : ''}`} />
+      </button>
+
+      {openFilter === title && (
+        <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-4">
+          <div className="max-h-64 overflow-y-auto space-y-2">
+            {options.map(opt => (
+              <label key={opt} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(opt)}
+                  onChange={() => toggleFilter(selected, setSelected, opt)}
+                  className="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
+                />
+                <span className="text-sm">{opt}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   if (loading) return <div className="text-center py-20 text-2xl">Loading spray plans...</div>;
 
@@ -138,109 +132,51 @@ export default function SprayPlanList() {
         </Link>
       </div>
 
-      {/* Filters & Export */}
+      {/* Filters & Actions */}
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-3xl p-8 mb-10 shadow-xl">
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <label className="flex items-center gap-4">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-3">
               <input
                 type="checkbox"
                 checked={hideCompleted}
                 onChange={(e) => setHideCompleted(e.target.checked)}
                 className="h-6 w-6 text-indigo-600 rounded focus:ring-indigo-500"
               />
-              <span className="text-xl font-bold text-gray-800">Hide Completed Plans</span>
+              <span className="text-xl font-bold text-gray-800">Hide Completed</span>
             </label>
+
+            {activeFilterCount > 0 && (
+              <div className="flex items-center gap-3">
+                <span className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-full">
+                  {activeFilterCount} Active Filter{activeFilterCount > 1 ? 's' : ''}
+                </span>
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="flex justify-end gap-6">
-            <button
-              onClick={exportToPDF}
-              className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl shadow-xl transition"
-            >
+          <div className="flex gap-4">
+            <button className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-xl transition">
               Export PDF
             </button>
-            <button
-              onClick={exportToExcel}
-              className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-xl shadow-xl transition"
-            >
+            <button className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-xl transition">
               Export Excel
             </button>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-8">
-          {/* Block Filter */}
-          <div>
-            <label className="block text-lg font-bold text-gray-800 mb-3">Filter by Block</label>
-            <div className="space-y-2 max-h-60 overflow-y-auto bg-white rounded-xl p-4 border border-gray-300">
-              {uniqueBlocks.map(block => (
-                <label key={block} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={blockFilter.includes(block)}
-                    onChange={() => toggleFilter(blockFilter, setBlockFilter, block)}
-                    className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
-                  />
-                  <span className="text-lg">{block}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Pest Filter */}
-          <div>
-            <label className="block text-lg font-bold text-gray-800 mb-3">Filter by Target Pest</label>
-            <div className="space-y-2 max-h-60 overflow-y-auto bg-white rounded-xl p-4 border border-gray-300">
-              {uniquePests.map(pest => (
-                <label key={pest} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={pestFilter.includes(pest)}
-                    onChange={() => toggleFilter(pestFilter, setPestFilter, pest)}
-                    className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
-                  />
-                  <span className="text-lg">{pest}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Equipment Filter */}
-          <div>
-            <label className="block text-lg font-bold text-gray-800 mb-3">Filter by Equipment</label>
-            <div className="space-y-2 max-h-60 overflow-y-auto bg-white rounded-xl p-4 border border-gray-300">
-              {uniqueEquipment.map(eq => (
-                <label key={eq} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={equipmentFilter.includes(eq)}
-                    onChange={() => toggleFilter(equipmentFilter, setEquipmentFilter, eq)}
-                    className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
-                  />
-                  <span className="text-lg">{eq}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Applicator Filter */}
-          <div>
-            <label className="block text-lg font-bold text-gray-800 mb-3">Filter by Applicator</label>
-            <div className="space-y-2 max-h-60 overflow-y-auto bg-white rounded-xl p-4 border border-gray-300">
-              {uniqueApplicators.map(app => (
-                <label key={app} className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={applicatorFilter.includes(app)}
-                    onChange={() => toggleFilter(applicatorFilter, setApplicatorFilter, app)}
-                    className="h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500"
-                  />
-                  <span className="text-lg">{app}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+        {/* Column Filter Icons */}
+        <div className="flex gap-8">
+          <FilterDropdown title="Block" options={uniqueBlocks} selected={blockFilter} setSelected={setBlockFilter} />
+          <FilterDropdown title="Target Pest" options={uniquePests} selected={pestFilter} setSelected={setPestFilter} />
+          <FilterDropdown title="Equipment" options={uniqueEquipment} selected={equipmentFilter} setSelected={setEquipmentFilter} />
+          <FilterDropdown title="Applicator" options={uniqueApplicators} selected={applicatorFilter} setSelected={setApplicatorFilter} />
         </div>
       </div>
 
