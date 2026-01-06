@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 
 export default function UserForm() {
   const { tenant } = useParams();
@@ -18,8 +18,13 @@ export default function UserForm() {
     last_name: '',
     phone_number: '',
     department: '',
-    // Add other fields as needed
+    acdc_license_number: '',
+    acdc_expiry_date: '',
+    chemcert_number: '',
+    chemcert_expiry_date: '',
+    other_qualifications: '',
   });
+
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -32,13 +37,25 @@ export default function UserForm() {
           const user = data.users.find(u => u.id === parseInt(userId));
           if (user) {
             setFormData({
-              ...formData,
-              ...user,
-              password: '', // Don't pre-fill password
+              username: user.username,
+              email: user.email || '',
+              password: '',
+              role: user.role || 'view',
+              is_spray_operator: user.is_spray_operator || false,
+              first_name: user.first_name || '',
+              last_name: user.last_name || '',
+              phone_number: user.phone_number || '',
+              department: user.department || '',
+              acdc_license_number: user.acdc_license_number || '',
+              acdc_expiry_date: user.acdc_expiry_date || '',
+              chemcert_number: user.chemcert_number || '',
+              chemcert_expiry_date: user.chemcert_expiry_date || '',
+              other_qualifications: user.other_qualifications || '',
             });
           }
           setLoading(false);
-        });
+        })
+        .catch(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -82,39 +99,40 @@ export default function UserForm() {
     }
   };
 
-  if (loading) return <div className="text-center py-20">Loading...</div>;
+  if (loading) return <div className="text-center py-20 text-2xl">Loading user...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">
+    <div className="max-w-5xl mx-auto p-6">
+      <h1 className="text-4xl font-bold mb-10 text-center text-gray-800">
         {isEdit ? 'Edit User' : 'Add New User'}
       </h1>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-2xl p-10 space-y-10">
+        {/* Basic Info */}
+        <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Username *</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">Username *</label>
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-lg font-semibold text-gray-700 mb-3">
               {isEdit ? 'New Password (leave blank to keep)' : 'Password *'}
             </label>
             <input
@@ -123,16 +141,16 @@ export default function UserForm() {
               value={formData.password}
               onChange={handleChange}
               required={!isEdit}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">Role *</label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             >
               <option value="view">View Only</option>
               <option value="general">General User</option>
@@ -142,83 +160,149 @@ export default function UserForm() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <input
-            type="checkbox"
-            name="is_spray_operator"
-            id="is_spray_operator"
-            checked={formData.is_spray_operator}
-            onChange={handleChange}
-            className="h-5 w-5 text-green-600 rounded focus:ring-green-500"
-          />
-          <label htmlFor="is_spray_operator" className="text-lg font-medium text-gray-700">
-            User is Spray Operator
-          </label>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Personal Info */}
+        <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">First Name</label>
             <input
               type="text"
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">Last Name</label>
             <input
               type="text"
               name="last_name"
               value={formData.last_name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">Phone Number</label>
             <input
               type="text"
               name="phone_number"
               value={formData.phone_number}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <label className="block text-lg font-semibold text-gray-700 mb-3">Department</label>
             <input
               type="text"
               name="department"
               value={formData.department}
               onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-300 focus:border-green-500 text-lg"
             />
           </div>
         </div>
 
-        <div className="flex justify-end gap-4 pt-6">
+        {/* Spray Operator Toggle */}
+        <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-3xl p-8 border-2 border-emerald-200">
+          <label className="flex items-center gap-6 cursor-pointer">
+            <input
+              type="checkbox"
+              name="is_spray_operator"
+              checked={formData.is_spray_operator}
+              onChange={handleChange}
+              className="h-8 w-8 text-emerald-600 rounded focus:ring-emerald-500"
+            />
+            <span className="text-2xl font-bold text-gray-800">This user is a Spray Operator</span>
+          </label>
+        </div>
+
+        {/* Spray Operator Qualifications — Shown only if is_spray_operator */}
+        {formData.is_spray_operator && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-3xl p-10 border-2 border-amber-200 space-y-8">
+            <h2 className="text-3xl font-bold text-center text-amber-800 mb-8">Spray Operator Qualifications</h2>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-lg font-semibold text-gray-800 mb-3">ACDC Commercial Operator License Number</label>
+                <input
+                  type="text"
+                  name="acdc_license_number"
+                  value={formData.acdc_license_number}
+                  onChange={handleChange}
+                  placeholder="e.g. QLD123456"
+                  className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-amber-300 focus:border-amber-500 text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-lg font-semibold text-gray-800 mb-3">ACDC Expiry Date</label>
+                <input
+                  type="date"
+                  name="acdc_expiry_date"
+                  value={formData.acdc_expiry_date}
+                  onChange={handleChange}
+                  className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-amber-300 focus:border-amber-500 text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-lg font-semibold text-gray-800 mb-3">ChemCert Accreditation Number</label>
+                <input
+                  type="text"
+                  name="chemcert_number"
+                  value={formData.chemcert_number}
+                  onChange={handleChange}
+                  placeholder="e.g. CC2025-123"
+                  className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-amber-300 focus:border-amber-500 text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-lg font-semibold text-gray-800 mb-3">ChemCert Expiry Date</label>
+                <input
+                  type="date"
+                  name="chemcert_expiry_date"
+                  value={formData.chemcert_expiry_date}
+                  onChange={handleChange}
+                  className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-amber-300 focus:border-amber-500 text-lg"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-lg font-semibold text-gray-800 mb-3">Other Qualifications / Training</label>
+              <textarea
+                name="other_qualifications"
+                value={formData.other_qualifications}
+                onChange={handleChange}
+                rows="5"
+                placeholder="List any additional spray-related training, certificates, or licenses..."
+                className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-amber-300 focus:border-amber-500 text-lg"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex justify-end gap-8 pt-10">
           <Link
             to={`/dashboard/${tenant}/users`}
-            className="px-8 py-4 border border-gray-300 rounded-xl text-lg font-medium hover:bg-gray-50 transition"
+            className="px-14 py-6 border-2 border-gray-400 rounded-xl text-2xl font-bold text-gray-700 hover:bg-gray-100 transition"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={saving}
-            className="px-12 py-4 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold rounded-xl text-lg transition"
+            className="px-20 py-6 bg-green-600 hover:bg-green-700 disabled:opacity-70 text-white font-bold text-3xl rounded-xl shadow-2xl transition transform hover:scale-105"
           >
             {saving ? 'Saving...' : isEdit ? 'Update User' : 'Create User'}
           </button>
         </div>
 
         {message && (
-          <p className={`text-center text-xl font-medium mt-8 ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`text-center text-3xl font-bold mt-12 ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
             {message}
-          </p>
+          </div>
         )}
       </form>
     </div>
