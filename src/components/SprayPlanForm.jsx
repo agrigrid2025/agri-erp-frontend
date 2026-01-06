@@ -389,27 +389,27 @@ export default function SprayPlanForm() {
               {/* Right: Parameter Cards */}
               <div className="grid grid-cols-2 gap-8">
                 <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                  <div className="text-6xl font-bold text-blue-700">{target.rain}%</div>
+                  <div className="text-6xl font-bold text-blue-700">{target?.rain ?? 0}%</div>
                   <div className="text-xl text-gray-600 mt-4">Rain Chance</div>
                 </div>
                 <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                  <div className="text-6xl font-bold text-gray-700">{target.wind}<small className="text-4xl">/{target.gust}</small></div>
+                  <div className="text-6xl font-bold text-gray-700">{target?.wind ?? 0}<small className="text-4xl">/{target?.gust ?? 0}</small></div>
                   <div className="text-xl text-gray-600 mt-4">Wind / Gust (km/h)</div>
                 </div>
                 <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                  <div className="text-6xl font-bold text-purple-700">{target.visibility}</div>
+                  <div className="text-6xl font-bold text-purple-700">{target?.visibility ?? 0}</div>
                   <div className="text-xl text-gray-600 mt-4">Visibility (km)</div>
                 </div>
                 <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                  <div className="text-6xl font-bold text-yellow-700">UV {target.uv}</div>
+                  <div className="text-6xl font-bold text-yellow-700">UV {target?.uv ?? 0}</div>
                   <div className="text-xl text-gray-600 mt-4">UV Index</div>
                 </div>
                 <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                  <div className="text-6xl font-bold text-indigo-700">{target.cloud}%</div>
+                  <div className="text-6xl font-bold text-indigo-700">{target?.cloud ?? 0}%</div>
                   <div className="text-xl text-gray-600 mt-4">Cloud Cover</div>
                 </div>
                 <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
-                  <div className="text-6xl font-bold text-green-700">{target.humidity}%</div>
+                  <div className="text-6xl font-bold text-green-700">{target?.humidity ?? 0}%</div>
                   <div className="text-xl text-gray-600 mt-4">Humidity</div>
                 </div>
               </div>
