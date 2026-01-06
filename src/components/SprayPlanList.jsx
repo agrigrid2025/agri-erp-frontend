@@ -69,7 +69,7 @@ export default function SprayPlanList() {
                       View
                     </Link>
                     {plan.has_record ? (
-                      <Link to={`/dashboard/${tenant}/spray/record/${plan.id}`} className="text-green-600 hover:underline">
+                      <Link to={`/dashboard/${tenant}/spray/record/${plan.record_id}`} className="text-blue-600 hover:underline">
                         View Record
                       </Link>
                     ) : (
