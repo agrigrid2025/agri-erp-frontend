@@ -169,11 +169,37 @@ export default function SprayPlanForm() {
     setSaving(true);
     setMessage('');
     try {
-      console.log('Saving plan:', formData);
-      setMessage('Spray plan saved successfully! (placeholder)');
-      setTimeout(() => navigate(`/dashboard/${tenant}/spray/plans`), 1500);
+      const payload = {
+        block: formData.block,
+        target_pest: formData.target_pest,
+        scheduled_date: formData.scheduled_date,
+        equipment: formData.equipment || null,
+        applicator: formData.applicator || null,
+        notes: formData.notes,
+        products: formData.products.filter(p => p.item && p.amount).map(p => ({
+          item: p.item,
+          amount: p.amount,
+        })),
+      };
+
+      const res = await fetch(`https://${tenant}.agrigrid.net/spray/api/spray-plan/save/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setMessage('Spray plan saved successfully!');
+        setTimeout(() => navigate(`/dashboard/${tenant}/spray/plans`), 1500);
+      } else {
+        setMessage(data.error || 'Save failed');
+      }
     } catch (err) {
-      setMessage('Save failed');
+      console.error(err);
+      setMessage('Network error');
     } finally {
       setSaving(false);
     }
