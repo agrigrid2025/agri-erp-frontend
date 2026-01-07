@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// Use env var for API base (set in .env.local and Vercel dashboard)
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://api.agrigrid.net';  // ← NEW: Central API
+
 export default function LoginPage() {
   const { tenant } = useParams();
   const navigate = useNavigate();
@@ -28,21 +31,23 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch(`https://${tenant}.agrigrid.net/api/login/`, {
+      const res = await fetch(`${API_BASE}/api/login/`, {  // ← Updated: Central API, no tenant subdomain
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
+          tenant,  // ← Optional: Send tenant if backend needs it
         }),
         credentials: 'include',
       });
       const data = await res.json();
 
       if (data.success) {
-        // Save user to localStorage
+        // Save user to localStorage (or use context)
         localStorage.setItem('user', JSON.stringify(data.user));
-        navigate(`/dashboard/${tenant}`);
+        login(data.user);  // If your AuthContext has login method
+        navigate(`/app/dashboard/${tenant}`);  // ← Updated: Add /app prefix
       } else {
         setError(data.message || 'Invalid credentials or inactive account');
       }
@@ -105,7 +110,7 @@ export default function LoginPage() {
               placeholder="Password"
             />
             <div className="text-right mt-1">
-              <Link to="/password-reset" className="text-muted text-sm hover:underline">
+              <Link to="/app/password-reset" className="text-muted text-sm hover:underline">  {/* ← Updated: /app prefix if public */}
                 Forgot?
               </Link>
             </div>
