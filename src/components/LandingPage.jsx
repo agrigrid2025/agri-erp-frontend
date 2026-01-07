@@ -1,111 +1,244 @@
 // src/components/LandingPage.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    surname: '',
+    email: '',
+    phone: '',
+    farmName: '',
+    username: '',
+    password: '',
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Replace with your actual backend endpoint for beta sign-ups
+    try {
+      const res = await fetch('https://api.agrigrid.net/api/beta-signup/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        alert('Submission failed — please try again or contact us.');
+      }
+    } catch (err) {
+      alert('Network error — please contact info@agrigrid.net directly.');
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
-      {/* Cutting-Edge Hero – Full bleed, parallax feel, hype copy */}
+      {/* Hero Section */}
       <section
         className="relative h-screen flex items-center justify-center bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('/hero.jpg')`,
         }}
       >
-        <div className="absolute inset-0 bg-green-500 opacity-10 animate-pulse"></div> {/* Subtle futuristic glow */}
+        <div className="absolute inset-0 bg-green-500 opacity-10 animate-pulse"></div>
         <div className="relative text-center px-6 max-w-5xl z-10">
-          <img
-            src="/logo.png"
-            alt="AgriGrid Logo"
-            className="mx-auto h-24 mb-8 drop-shadow-2xl"
-          />
+          <img src="/logo.png" alt="AgriGrid Logo" className="mx-auto h-24 mb-8 drop-shadow-2xl" />
           <h1 className="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight">
             The Future of Farming <span className="text-green-400">Is Here</span>
           </h1>
           <p className="text-2xl md:text-3xl mb-10 font-light opacity-90">
-            Hyper-precise tools. Real-time insights. Freshcare-ready compliance. Built for the next generation of Australian farmers.
+            Hyper-precise tools. Real-time insights. Freshcare-ready compliance.
           </p>
           <div className="space-x-6">
-            <Link
-              to="/app"
+            <button
+              onClick={() => document.getElementById('beta-form').scrollIntoView({ behavior: 'smooth' })}
               className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-xl px-12 py-5 rounded-full transition transform hover:scale-105 shadow-2xl"
             >
-              Join the Revolution – Free Beta Access
+              Join the Revolution – Apply for Beta
+            </button>
+            <Link
+              to="/app"
+              className="inline-block bg-transparent border-2 border-green-400 hover:bg-green-400 hover:text-black font-bold text-xl px-12 py-5 rounded-full transition"
+            >
+              Login for Approved Beta Users
             </Link>
           </div>
-          <p className="mt-8 text-lg opacity-80">
-            Limited spots • Be one of the first to transform your farm
-          </p>
         </div>
       </section>
 
-      {/* Hype Features – Screenshot-style previews with glow */}
+      {/* Expanded 6 Screenshot Cards – 3x2 grid */}
       <section className="py-32 px-6 relative">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-5xl md:text-6xl font-bold mb-20">
             Powering the Farms of Tomorrow — <span className="text-green-400">Today</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {/* Feature 1: Dashboard Preview */}
+            {/* 1. Precise Farm Mapping */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
-                <img
-                  src="https://miro.medium.com/v2/resize:fit:2000/1*JFwtXPPDjKlJaZ9y_UyewQ.png"  // Modern agtech dashboard
-                  alt="AgriGrid Cutting-Edge Dashboard"
-                  className="rounded-2xl shadow-xl mb-6"
-                />
-                <h3 className="text-3xl font-bold mb-4">Intuitive Command Center</h3>
-                <p className="text-lg opacity-80">Everything at your fingertips — fields, weather, inventory, safety — in one stunning interface.</p>
+                <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
+                  <span className="text-xl">Farm Mapping Screenshot</span>
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Precise Farm Mapping</h3>
+                <p className="text-lg opacity-80">Draw fields, assign crops, and visualize every detail with satellite precision.</p>
               </div>
             </div>
 
-            {/* Feature 2: Weather + Compliance */}
+            {/* 2. HyperLocal Weather */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
-                <img
-                  src="https://play-lh.googleusercontent.com/ktSdMLd5SflXYweKszBWjjLt8Z_xvwKtH_0q8htX7rFG8rGDewkV-BkiioqbjEtctNWJ=w526-h296-rw"  // Hyperlocal weather app
-                  alt="HyperLocal Weather Powered by Tomorrow.io"
-                  className="rounded-2xl shadow-xl mb-6"
-                />
-                <h3 className="text-3xl font-bold mb-4">HyperLocal Intelligence</h3>
-                <p className="text-lg opacity-80">Tomorrow.io-powered forecasts + automated Freshcare spray compliance. Never guess again.</p>
+                <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
+                  <span className="text-xl">Weather Forecast Screenshot</span>
+                </div>
+                <h3 className="text-3xl font-bold mb-4">HyperLocal Weather Intelligence</h3>
+                <p className="text-lg opacity-80">Tomorrow.io-powered pinpoint forecasts for your exact paddocks.</p>
               </div>
             </div>
 
-            {/* Feature 3: Inventory & Safety */}
+            {/* 3. On-Farm Inventory */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
-                <img
-                  src="https://agtech.folio3.com/wp-content/uploads/2023/03/agriwebb.png"  // Inventory screenshot
-                  alt="Real-Time Inventory & Safety Reporting"
-                  className="rounded-2xl shadow-xl mb-6"
-                />
-                <h3 className="text-3xl font-bold mb-4">Total Control & Peace of Mind</h3>
-                <p className="text-lg opacity-80">Track every item, stay compliant, and keep your team safe — effortlessly.</p>
+                <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
+                  <span className="text-xl">Inventory Screenshot</span>
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Real-Time Inventory Control</h3>
+                <p className="text-lg opacity-80">Track stock, purchases, and usage across warehouses with zero hassle.</p>
+              </div>
+            </div>
+
+            {/* 4. Health & Safety Management */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
+                <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
+                  <span className="text-xl">Safety Screenshot</span>
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Health & Safety Reporting</h3>
+                <p className="text-lg opacity-80">Record hazards, incidents, and manage compliance effortlessly.</p>
+              </div>
+            </div>
+
+            {/* 5. Freshcare Spray Compliance */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
+                <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
+                  <span className="text-xl">Spray Report Screenshot</span>
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Freshcare Spray Compliance</h3>
+                <p className="text-lg opacity-80">Automated records and reports — audit-ready in seconds.</p>
+              </div>
+            </div>
+
+            {/* 6. Equipment & Team Management */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
+                <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
+                  <span className="text-xl">Team & Equipment Screenshot</span>
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Team & Equipment Tracking</h3>
+                <p className="text-lg opacity-80">Manage staff, machinery, and maintenance schedules seamlessly.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Urgent Beta Call – High hype */}
-      <section className="py-32 px-6 bg-gradient-to-r from-green-600 to-emerald-600">
-        <div className="max-w-5xl mx-auto text-center">
+      {/* Beta Application Form Section */}
+      <section id="beta-form" className="py-32 px-6 bg-gradient-to-b from-black to-gray-900">
+        <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-5xl md:text-7xl font-extrabold mb-8">
-            The Future Starts Now
+            Secure Your Spot in the Beta
           </h2>
           <p className="text-2xl mb-12 opacity-90">
-            Be among the first farmers revolutionizing agriculture with AgriGrid.
+            Limited access — apply now and be part of the agricultural revolution.
           </p>
-          <p className="text-3xl font-bold mb-12 bg-black bg-opacity-50 inline-block py-6 px-12 rounded-2xl">
-            To join the exclusive beta program, email <a href="mailto:info@agrigrid.net" className="text-green-300 underline">info@agrigrid.net</a> today
-          </p>
-          <Link
-            to="/app"
-            className="inline-block bg-black hover:bg-gray-900 text-green-400 font-bold text-2xl px-16 py-6 rounded-full transition transform hover:scale-110 shadow-2xl"
-          >
-            Claim Your Spot – Free Beta Access
-          </Link>
+
+          {submitted ? (
+            <div className="text-3xl font-bold text-green-400">
+              Thank you! We'll review your application and be in touch soon.
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <input
+                type="text"
+                name="name"
+                placeholder="First Name"
+                required
+                value={formData.name}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+              />
+              <input
+                type="text"
+                name="surname"
+                placeholder="Surname"
+                required
+                value={formData.surname}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+              />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+              />
+              <input
+                type="text"
+                name="farmName"
+                placeholder="Farm Name"
+                required
+                value={formData.farmName}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400 md:col-span-2"
+              />
+              <input
+                type="text"
+                name="username"
+                placeholder="Preferred Username"
+                required
+                value={formData.username}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="md:col-span-2 bg-green-500 hover:bg-green-400 text-black font-bold text-2xl py-5 rounded-full transition transform hover:scale-105 shadow-2xl disabled:opacity-70"
+              >
+                {loading ? 'Submitting...' : 'Apply for Beta Access'}
+              </button>
+            </form>
+          )}
         </div>
       </section>
 
@@ -113,6 +246,9 @@ const LandingPage = () => {
       <footer className="py-12 px-6 bg-black">
         <div className="max-w-6xl mx-auto text-center opacity-70">
           <img src="/logo.png" alt="AgriGrid" className="h-12 mx-auto mb-4" />
+          <p className="text-sm mb-4">
+            Questions? <a href="mailto:info@agrigrid.net" className="text-green-400 underline">info@agrigrid.net</a>
+          </p>
           <p className="text-sm">© 2026 AgriGrid. Revolutionizing Australian agriculture.</p>
         </div>
       </footer>
