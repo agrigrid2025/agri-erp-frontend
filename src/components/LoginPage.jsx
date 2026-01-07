@@ -31,28 +31,37 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch(`${API_BASE}/api/login/`, {  // ← Updated: Central API, no tenant subdomain
+      // Use tenant subdomain for API
+      const apiUrl = `https://${tenant}.agrigrid.net/api/login/`;
+
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
-          tenant,  // ← Optional: Send tenant if backend needs it
         }),
         credentials: 'include',
       });
+
+      if (!res.ok) {
+        // Handle non-200 (e.g., 404 if tenant wrong, but unlikely here)
+        const data = await res.json().catch(() => ({}));
+        setError(data.message || 'Login failed');
+        return;
+      }
+
       const data = await res.json();
 
       if (data.success) {
-        // Save user to localStorage (or use context)
         localStorage.setItem('user', JSON.stringify(data.user));
-        login(data.user);  // If your AuthContext has login method
-        navigate(`/app/dashboard/${tenant}`);  // ← Updated: Add /app prefix
+        // Optional: call your AuthContext login
+        navigate(`/app/dashboard/${tenant}`);
       } else {
         setError(data.message || 'Invalid credentials or inactive account');
       }
     } catch (err) {
-      setError('Network error — check connection');
+      setError('Network error — check your connection or tenant code');
     } finally {
       setLoading(false);
     }
