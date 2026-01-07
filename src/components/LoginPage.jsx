@@ -2,13 +2,24 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Use env var for API base (set in .env.local and Vercel dashboard)
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://api.agrigrid.net';  // ← NEW: Central API
+// Helper to get CSRF token from cookie (Django sets it on any response)
+const getCsrfToken = () => {
+  const name = 'csrftoken';
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [key, value] = cookie.trim().split('=');
+    if (key === name) {
+      return decodeURIComponent(value);
+    }
+  }
+  return null;
+};
 
 export default function LoginPage() {
-  const { tenant } = useParams();
+  const { tenant } = useParams();  // e.g., "costawalkamin" or "taryn"
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useAuth();  // If you use AuthContext to store user
+
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -31,36 +42,38 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Use tenant subdomain for API
+      // Use tenant-specific subdomain for API calls
       const apiUrl = `https://${tenant}.agrigrid.net/api/login/`;
+
+      const csrfToken = getCsrfToken();
 
       const res = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken || '',  // Required for Django CSRF protection
+        },
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
         }),
-        credentials: 'include',
+        credentials: 'include',  // Important: sends/receives session cookie
       });
-
-      if (!res.ok) {
-        // Handle non-200 (e.g., 404 if tenant wrong, but unlikely here)
-        const data = await res.json().catch(() => ({}));
-        setError(data.message || 'Login failed');
-        return;
-      }
 
       const data = await res.json();
 
-      if (data.success) {
+      if (res.ok && data.success) {
+        // Save user data (adjust based on your backend response)
         localStorage.setItem('user', JSON.stringify(data.user));
-        // Optional: call your AuthContext login
+        if (login) login(data.user);  // Update AuthContext if used
+
+        // Navigate to dashboard under /app
         navigate(`/app/dashboard/${tenant}`);
       } else {
         setError(data.message || 'Invalid credentials or inactive account');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Network error — check your connection or tenant code');
     } finally {
       setLoading(false);
@@ -76,7 +89,7 @@ export default function LoginPage() {
             <img src="/logo.png" alt="AgriGrid Logo" className="h-10" />
             <h1 className="text-3xl font-bold text-gray-800">AgriGrid</h1>
           </div>
-          <p className="text-gray-600 text-sm uppercase">{tenant}</p>
+          <p className="text-gray-600 text-sm uppercase">{tenant || 'Farm'}</p>
         </div>
 
         <h4 className="text-xl font-semibold mb-6 text-center">Log in</h4>
@@ -119,7 +132,7 @@ export default function LoginPage() {
               placeholder="Password"
             />
             <div className="text-right mt-1">
-              <Link to="/app/password-reset" className="text-muted text-sm hover:underline">  {/* ← Updated: /app prefix if public */}
+              <Link to="/app/password-reset" className="text-muted text-sm hover:underline">
                 Forgot?
               </Link>
             </div>
@@ -128,7 +141,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition disabled:opacity-70"
           >
             {loading ? 'Logging in...' : 'Log in'}
           </button>
