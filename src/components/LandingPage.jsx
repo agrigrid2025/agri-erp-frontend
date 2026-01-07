@@ -1,45 +1,8 @@
 // src/components/LandingPage.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
-    email: '',
-    phone: '',
-    farmName: '',
-    username: '',
-    password: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    // Replace with your actual backend endpoint for beta sign-ups
-    try {
-      const res = await fetch('https://api.agrigrid.net/api/beta-signup/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        setSubmitted(true);
-      } else {
-        alert('Submission failed — please try again or contact us.');
-      }
-    } catch (err) {
-      alert('Network error — please contact info@agrigrid.net directly.');
-    }
-    setLoading(false);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
       {/* Hero Section */}
@@ -75,14 +38,14 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Expanded 6 Screenshot Cards – 3x2 grid */}
+      {/* 6 Screenshot Cards – 3x2 grid */}
       <section className="py-32 px-6 relative">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-5xl md:text-6xl font-bold mb-20">
             Powering the Farms of Tomorrow — <span className="text-green-400">Today</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {/* 1. Precise Farm Mapping */}
+            {/* Card 1: Precise Farm Mapping */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
                 <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
@@ -93,7 +56,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* 2. HyperLocal Weather */}
+            {/* Card 2: HyperLocal Weather */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
                 <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
@@ -104,7 +67,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* 3. On-Farm Inventory */}
+            {/* Card 3: Real-Time Inventory */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
                 <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
@@ -115,7 +78,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* 4. Health & Safety Management */}
+            {/* Card 4: Health & Safety */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
                 <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
@@ -126,7 +89,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* 5. Freshcare Spray Compliance */}
+            {/* Card 5: Freshcare Spray Compliance */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
                 <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
@@ -137,7 +100,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* 6. Equipment & Team Management */}
+            {/* Card 6: Team & Equipment */}
             <div className="group">
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
                 <div className="bg-gray-700 rounded-2xl h-64 mb-6 flex items-center justify-center text-gray-500">
@@ -151,7 +114,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Beta Application Form Section */}
+      {/* Beta Application Form Section – Formspree Integration */}
       <section id="beta-form" className="py-32 px-6 bg-gradient-to-b from-black to-gray-900">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-5xl md:text-7xl font-extrabold mb-8">
@@ -161,12 +124,6 @@ const LandingPage = () => {
             Limited access — apply now and be part of the agricultural revolution.
           </p>
 
-          {submitted ? (
-            <div className="text-3xl font-bold text-green-400">
-              Thank you! We'll review your application and be in touch soon.
-            </div>
-          ) : (
-          {/* Inside the form section – replace the entire <form> block */}
           <form action="https://formspree.io/f/xrebnerj" method="POST" className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <input
               type="text"
@@ -224,9 +181,6 @@ const LandingPage = () => {
               Apply for Beta Access
             </button>
           </form>
-
-{/* Optional success message – Formspree redirects to a thank-you page, or use their AJAX for in-page */}
-          )}
         </div>
       </section>
 
