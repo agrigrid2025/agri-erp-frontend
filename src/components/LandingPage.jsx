@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section – Uses local /hero.jpg */}
+      {/* Hero Section – Uses local /hero.jpg (place your farm image in public/hero.jpg) */}
       <section
         className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{
@@ -15,7 +15,7 @@ const LandingPage = () => {
         <div className="text-center text-white px-6 max-w-4xl">
           <img
             src="/logo.png"
-            alt="AgriGrid Logo"
+            alt="AgriGrid Farm Management Software Logo"
             className="mx-auto h-20 mb-8"
           />
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -36,7 +36,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Section – Now 5 cards including Freshcare Compliance */}
+      {/* Features Section – 5 cards including Freshcare Compliance */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-12">
@@ -71,13 +71,31 @@ const LandingPage = () => {
               <p className="text-gray-600">Record hazards, incidents, and reports easily</p>
             </div>
 
-            {/* 5. Freshcare Spray Compliance – New Card */}
+            {/* 5. Freshcare Spray Compliance */}
             <div className="bg-teal-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
               <div className="text-4xl font-bold text-teal-700 mb-3">Freshcare Ready</div>
               <h3 className="text-xl font-semibold mb-2">Spray Compliance & Reporting</h3>
               <p className="text-gray-600">Automated records and reports for Freshcare certification</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Beta Invitation Section – Very visible call for beta testers */}
+      <section className="py-20 px-6 bg-gradient-to-r from-blue-700 to-blue-600 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">
+            Join Our Beta Testing Program
+          </h2>
+          <p className="text-xl mb-8">
+            We're looking for Australian farmers to help shape AgriGrid.
+          </p>
+          <p className="text-2xl font-semibold mb-10 bg-white text-blue-800 py-6 px-8 rounded-lg shadow-xl inline-block">
+            To join the beta, please send an email to <a href="mailto:info@agrigrid.net" className="underline font-bold">info@agrigrid.net</a>
+          </p>
+          <p className="text-lg opacity-90">
+            Free access during beta • No credit card required • Your feedback will directly improve the platform
+          </p>
         </div>
       </section>
 
@@ -88,7 +106,7 @@ const LandingPage = () => {
             Ready to transform your farm operations?
           </h2>
           <p className="text-xl mb-10 opacity-90">
-            Join the beta today — completely free during testing.
+            Start exploring AgriGrid today.
           </p>
           <Link
             to="/app"
