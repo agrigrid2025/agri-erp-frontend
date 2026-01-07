@@ -9,7 +9,7 @@ const LandingPage = () => {
       <section
         className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1501439928630-6fa7b9f69e6b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/hero.jpg')`,
         }}
       >
         <div className="text-center text-white px-6 max-w-4xl">
