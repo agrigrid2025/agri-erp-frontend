@@ -9,7 +9,7 @@ export default function TenantEntry() {
     e.preventDefault();
     const trimmed = tenant.trim().toLowerCase();
     if (trimmed) {
-      navigate(`/login/${trimmed}`);
+      navigate(`/app/login/${trimmed}`);
     }
   };
 
