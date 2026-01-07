@@ -51,7 +51,7 @@ export default function LoginPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken || '',  // Required for Django CSRF protection
+          // 'X-CSRFToken': csrfToken || '',  // Required for Django CSRF protection
         },
         body: JSON.stringify({
           username: formData.username,
