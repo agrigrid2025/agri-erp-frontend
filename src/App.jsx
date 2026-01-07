@@ -1,5 +1,3 @@
-import RedirectOldPaths from './components/RedirectOldPaths';
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TenantEntry from './components/TenantEntry';
 import LoginPage from './components/LoginPage';
@@ -71,7 +69,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <RedirectOldPaths />
+        
         <Routes>
           {/* NEW: Public modern landing page at root */}
           <Route path="/" element={<LandingPage />} />
