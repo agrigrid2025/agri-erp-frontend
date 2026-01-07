@@ -166,78 +166,66 @@ const LandingPage = () => {
               Thank you! We'll review your application and be in touch soon.
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <input
-                type="text"
-                name="name"
-                placeholder="First Name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
-              />
-              <input
-                type="text"
-                name="surname"
-                placeholder="Surname"
-                required
-                value={formData.surname}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
-              />
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Phone Number"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
-              />
-              <input
-                type="text"
-                name="farmName"
-                placeholder="Farm Name"
-                required
-                value={formData.farmName}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400 md:col-span-2"
-              />
-              <input
-                type="text"
-                name="username"
-                placeholder="Preferred Username"
-                required
-                value={formData.username}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="md:col-span-2 bg-green-500 hover:bg-green-400 text-black font-bold text-2xl py-5 rounded-full transition transform hover:scale-105 shadow-2xl disabled:opacity-70"
-              >
-                {loading ? 'Submitting...' : 'Apply for Beta Access'}
-              </button>
-            </form>
+          {/* Inside the form section – replace the entire <form> block */}
+          <form action="https://formspree.io/f/xrebnerj" method="POST" className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <input
+              type="text"
+              name="name"
+              placeholder="First Name"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+            />
+            <input
+              type="text"
+              name="surname"
+              placeholder="Surname"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone Number"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+            />
+            <input
+              type="text"
+              name="farmName"
+              placeholder="Farm Name"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400 md:col-span-2"
+            />
+            <input
+              type="text"
+              name="username"
+              placeholder="Preferred Username"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+              className="px-6 py-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-4 focus:ring-green-400"
+            />
+            <button
+              type="submit"
+              className="md:col-span-2 bg-green-500 hover:bg-green-400 text-black font-bold text-2xl py-5 rounded-full transition transform hover:scale-105 shadow-2xl"
+            >
+              Apply for Beta Access
+            </button>
+          </form>
+
+{/* Optional success message – Formspree redirects to a thank-you page, or use their AJAX for in-page */}
           )}
         </div>
       </section>
