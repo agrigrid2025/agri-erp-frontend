@@ -4,126 +4,116 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section – Uses local /hero.jpg (place your farm image in public/hero.jpg) */}
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
+      {/* Cutting-Edge Hero – Full bleed, parallax feel, hype copy */}
       <section
-        className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="relative h-screen flex items-center justify-center bg-cover bg-center bg-fixed"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/hero.jpg')`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('/hero.jpg')`,
         }}
       >
-        <div className="text-center text-white px-6 max-w-4xl">
+        <div className="absolute inset-0 bg-green-500 opacity-10 animate-pulse"></div> {/* Subtle futuristic glow */}
+        <div className="relative text-center px-6 max-w-5xl z-10">
           <img
             src="/logo.png"
-            alt="AgriGrid Farm Management Software Logo"
-            className="mx-auto h-20 mb-8"
+            alt="AgriGrid Logo"
+            className="mx-auto h-24 mb-8 drop-shadow-2xl"
           />
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            AgriGrid
+          <h1 className="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight">
+            The Future of Farming <span className="text-green-400">Is Here</span>
           </h1>
-          <p className="text-xl md:text-2xl mb-4">
-            Modern Farm Management for the Future
+          <p className="text-2xl md:text-3xl mb-10 font-light opacity-90">
+            Hyper-precise tools. Real-time insights. Freshcare-ready compliance. Built for the next generation of Australian farmers.
           </p>
-          <p className="text-lg md:text-xl mb-10 max-w-3xl mx-auto opacity-90">
-            Powerful tools for field mapping, inventory, safety, weather, and compliance — all in one easy-to-use platform designed for Australian farmers.
+          <div className="space-x-6">
+            <Link
+              to="/app"
+              className="inline-block bg-green-500 hover:bg-green-400 text-black font-bold text-xl px-12 py-5 rounded-full transition transform hover:scale-105 shadow-2xl"
+            >
+              Join the Revolution – Free Beta Access
+            </Link>
+          </div>
+          <p className="mt-8 text-lg opacity-80">
+            Limited spots • Be one of the first to transform your farm
           </p>
-          <Link
-            to="/app"
-            className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-10 py-4 rounded-lg transition shadow-lg"
-          >
-            Get Started – Free Beta Access
-          </Link>
         </div>
       </section>
 
-      {/* Features Section – 5 cards including Freshcare Compliance */}
-      <section className="py-20 px-6 bg-white">
+      {/* Hype Features – Screenshot-style previews with glow */}
+      <section className="py-32 px-6 relative">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-800 mb-12">
-            Everything You Need to Run a Modern Farm
+          <h2 className="text-5xl md:text-6xl font-bold mb-20">
+            Powering the Farms of Tomorrow — <span className="text-green-400">Today</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-            {/* 1. Precise Field Mapping */}
-            <div className="bg-green-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
-              <div className="text-5xl font-bold text-green-700 mb-3">24</div>
-              <h3 className="text-xl font-semibold mb-2">Precise Field Mapping</h3>
-              <p className="text-gray-600">Map fields, assign crops, and plan with accuracy</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Feature 1: Dashboard Preview */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
+                <img
+                  src="https://miro.medium.com/v2/resize:fit:2000/1*JFwtXPPDjKlJaZ9y_UyewQ.png"  // Modern agtech dashboard
+                  alt="AgriGrid Cutting-Edge Dashboard"
+                  className="rounded-2xl shadow-xl mb-6"
+                />
+                <h3 className="text-3xl font-bold mb-4">Intuitive Command Center</h3>
+                <p className="text-lg opacity-80">Everything at your fingertips — fields, weather, inventory, safety — in one stunning interface.</p>
+              </div>
             </div>
 
-            {/* 2. HyperLocal Weather */}
-            <div className="bg-blue-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
-              <div className="text-2xl font-bold text-blue-700 mb-3">Powered by Tomorrow.io</div>
-              <h3 className="text-xl font-semibold mb-2">Live HyperLocal Weather</h3>
-              <p className="text-gray-600">Pinpoint forecasts for your exact location</p>
+            {/* Feature 2: Weather + Compliance */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
+                <img
+                  src="https://play-lh.googleusercontent.com/ktSdMLd5SflXYweKszBWjjLt8Z_xvwKtH_0q8htX7rFG8rGDewkV-BkiioqbjEtctNWJ=w526-h296-rw"  // Hyperlocal weather app
+                  alt="HyperLocal Weather Powered by Tomorrow.io"
+                  className="rounded-2xl shadow-xl mb-6"
+                />
+                <h3 className="text-3xl font-bold mb-4">HyperLocal Intelligence</h3>
+                <p className="text-lg opacity-80">Tomorrow.io-powered forecasts + automated Freshcare spray compliance. Never guess again.</p>
+              </div>
             </div>
 
-            {/* 3. On-Farm Inventory */}
-            <div className="bg-purple-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
-              <div className="text-5xl font-bold text-purple-700 mb-3">Full Control</div>
-              <h3 className="text-xl font-semibold mb-2">On-Farm Inventory</h3>
-              <p className="text-gray-600">Track stock, suppliers, and purchases in real time</p>
-            </div>
-
-            {/* 4. Health & Safety */}
-            <div className="bg-yellow-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
-              <div className="text-4xl font-bold text-yellow-700 mb-3">Safe & Compliant</div>
-              <h3 className="text-xl font-semibold mb-2">Health & Safety Management</h3>
-              <p className="text-gray-600">Record hazards, incidents, and reports easily</p>
-            </div>
-
-            {/* 5. Freshcare Spray Compliance */}
-            <div className="bg-teal-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
-              <div className="text-4xl font-bold text-teal-700 mb-3">Freshcare Ready</div>
-              <h3 className="text-xl font-semibold mb-2">Spray Compliance & Reporting</h3>
-              <p className="text-gray-600">Automated records and reports for Freshcare certification</p>
+            {/* Feature 3: Inventory & Safety */}
+            <div className="group">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl transform group-hover:scale-105 transition duration-500 border border-green-500 border-opacity-30">
+                <img
+                  src="https://agtech.folio3.com/wp-content/uploads/2023/03/agriwebb.png"  // Inventory screenshot
+                  alt="Real-Time Inventory & Safety Reporting"
+                  className="rounded-2xl shadow-xl mb-6"
+                />
+                <h3 className="text-3xl font-bold mb-4">Total Control & Peace of Mind</h3>
+                <p className="text-lg opacity-80">Track every item, stay compliant, and keep your team safe — effortlessly.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Beta Invitation Section – Very visible call for beta testers */}
-      <section className="py-20 px-6 bg-gradient-to-r from-blue-700 to-blue-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Join Our Beta Testing Program
+      {/* Urgent Beta Call – High hype */}
+      <section className="py-32 px-6 bg-gradient-to-r from-green-600 to-emerald-600">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-5xl md:text-7xl font-extrabold mb-8">
+            The Future Starts Now
           </h2>
-          <p className="text-xl mb-8">
-            We're looking for Australian farmers to help shape AgriGrid.
+          <p className="text-2xl mb-12 opacity-90">
+            Be among the first farmers revolutionizing agriculture with AgriGrid.
           </p>
-          <p className="text-2xl font-semibold mb-10 bg-white text-blue-800 py-6 px-8 rounded-lg shadow-xl inline-block">
-            To join the beta, please send an email to <a href="mailto:info@agrigrid.net" className="underline font-bold">info@agrigrid.net</a>
-          </p>
-          <p className="text-lg opacity-90">
-            Free access during beta • No credit card required • Your feedback will directly improve the platform
-          </p>
-        </div>
-      </section>
-
-      {/* Secondary CTA */}
-      <section className="py-20 px-6 bg-gradient-to-r from-green-700 to-green-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to transform your farm operations?
-          </h2>
-          <p className="text-xl mb-10 opacity-90">
-            Start exploring AgriGrid today.
+          <p className="text-3xl font-bold mb-12 bg-black bg-opacity-50 inline-block py-6 px-12 rounded-2xl">
+            To join the exclusive beta program, email <a href="mailto:info@agrigrid.net" className="text-green-300 underline">info@agrigrid.net</a> today
           </p>
           <Link
             to="/app"
-            className="inline-block bg-white text-green-700 hover:bg-gray-100 font-bold text-lg px-10 py-4 rounded-lg transition shadow-lg"
+            className="inline-block bg-black hover:bg-gray-900 text-green-400 font-bold text-2xl px-16 py-6 rounded-full transition transform hover:scale-110 shadow-2xl"
           >
-            Start Free Beta Now
+            Claim Your Spot – Free Beta Access
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-10 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <img src="/logo.png" alt="AgriGrid" className="h-10 mx-auto mb-4 opacity-70" />
-          <p className="text-sm">
-            © 2026 AgriGrid. All rights reserved.
-          </p>
+      <footer className="py-12 px-6 bg-black">
+        <div className="max-w-6xl mx-auto text-center opacity-70">
+          <img src="/logo.png" alt="AgriGrid" className="h-12 mx-auto mb-4" />
+          <p className="text-sm">© 2026 AgriGrid. Revolutionizing Australian agriculture.</p>
         </div>
       </footer>
     </div>
