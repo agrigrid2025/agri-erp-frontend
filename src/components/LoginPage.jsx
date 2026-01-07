@@ -1,184 +1,108 @@
-import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+// src/components/LandingPage.jsx
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-// Helper to get CSRF token from cookie (Django sets it on any response)
-const getCsrfToken = () => {
-  const name = 'csrftoken';
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    const [key, value] = cookie.trim().split('=');
-    if (key === name) {
-      return decodeURIComponent(value);
-    }
-  }
-  return null;
-};
-
-export default function LoginPage() {
-  const { tenant } = useParams();  // e.g., "costawalkamin" or "taryn"
-  const navigate = useNavigate();
-  const { login } = useAuth();  // If you use AuthContext to store user
-
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    remember: false,
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      // Use tenant-specific subdomain for API calls
-      const apiUrl = `https://${tenant}.agrigrid.net/api/login/`;
-
-      const csrfToken = getCsrfToken();
-
-      const res = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken || '',  // Required for Django CSRF protection
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
-        credentials: 'include',  // Important: sends/receives session cookie
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        // Save user data (adjust based on your backend response)
-        localStorage.setItem('user', JSON.stringify(data.user));
-        if (login) login(data.user);  // Update AuthContext if used
-
-        // Navigate to dashboard under /app
-        navigate(`/app/dashboard/${tenant}`);
-      } else {
-        setError(data.message || 'Invalid credentials or inactive account');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('Network error — check your connection or tenant code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-light flex items-center justify-center p-4">
-      <div className="card shadow-sm p-8" style={{ maxWidth: '400px', width: '100%' }}>
-        {/* Logo + Title */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/logo.png" alt="AgriGrid Logo" className="h-10" />
-            <h1 className="text-3xl font-bold text-gray-800">AgriGrid</h1>
-          </div>
-          <p className="text-gray-600 text-sm uppercase">{tenant || 'Farm'}</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section with Farm Background */}
+      <section
+        className="relative h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1501439928630-6fa7b9f69e6b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80')`,
+        }}
+      >
+        <div className="text-center text-white px-6 max-w-4xl">
+          <img
+            src="/logo.png"
+            alt="AgriGrid Logo"
+            className="mx-auto h-20 mb-8"
+          />
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            AgriGrid
+          </h1>
+          <p className="text-xl md:text-2xl mb-4">
+            Modern Farm Management for the Future
+          </p>
+          <p className="text-lg md:text-xl mb-10 max-w-3xl mx-auto opacity-90">
+            Manage fields, sprays, inventory, equipment, safety, and weather — all in one powerful, easy-to-use platform designed for Australian farmers.
+          </p>
+          <Link
+            to="/app"
+            className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-10 py-4 rounded-lg transition shadow-lg"
+          >
+            Get Started – Free Beta Access
+          </Link>
         </div>
 
-        <h4 className="text-xl font-semibold mb-6 text-center">Log in</h4>
+        {/* Optional scroll hint */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <svg className="w-8 h-8 text-white opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </section>
 
-        {error && (
-          <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded mb-6">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="text"
-              name="username"
-              id="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Email"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Password"
-            />
-            <div className="text-right mt-1">
-              <Link to="/app/password-reset" className="text-muted text-sm hover:underline">
-                Forgot?
-              </Link>
+      {/* Features Section */}
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-gray-800 mb-12">
+            Everything You Need to Run a Modern Farm
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="bg-green-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
+              <div className="text-5xl font-bold text-green-700 mb-3">24</div>
+              <h3 className="text-xl font-semibold mb-2">Total Fields</h3>
+              <p className="text-gray-600">Precise mapping and crop assignment</p>
+            </div>
+            <div className="bg-blue-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
+              <div className="text-5xl font-bold text-blue-700 mb-3">7</div>
+              <h3 className="text-xl font-semibold mb-2">Active Sprays</h3>
+              <p className="text-gray-600">Plan, record, and report with compliance</p>
+            </div>
+            <div className="bg-purple-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
+              <div className="text-5xl font-bold text-purple-700 mb-3">18</div>
+              <h3 className="text-xl font-semibold mb-2">Team Members</h3>
+              <p className="text-gray-600">Secure collaboration across your operation</p>
+            </div>
+            <div className="bg-yellow-100 rounded-xl p-8 shadow-md hover:shadow-lg transition">
+              <div className="text-4xl font-bold text-yellow-700 mb-3">Sunny</div>
+              <h3 className="text-xl font-semibold mb-2">Real-Time Weather</h3>
+              <p className="text-gray-600">Accurate forecasts for better decisions</p>
             </div>
           </div>
+        </div>
+      </section>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition disabled:opacity-70"
+      {/* Secondary CTA Section */}
+      <section className="py-20 px-6 bg-gradient-to-r from-green-700 to-green-600 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">
+            Ready to simplify your farm management?
+          </h2>
+          <p className="text-xl mb-10 opacity-90">
+            Join the beta today — completely free. No credit card required.
+          </p>
+          <Link
+            to="/app"
+            className="inline-block bg-white text-green-700 hover:bg-gray-100 font-bold text-lg px-10 py-4 rounded-lg transition shadow-lg"
           >
-            {loading ? 'Logging in...' : 'Log in'}
-          </button>
+            Start Free Beta Now
+          </Link>
+        </div>
+      </section>
 
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              name="remember"
-              id="remember"
-              checked={formData.remember}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 rounded"
-            />
-            <label htmlFor="remember" className="text-sm text-gray-700">
-              Remember me
-            </label>
-          </div>
-
-          <hr className="my-6" />
-
-          <p className="text-center text-gray-600 text-sm">or access quickly</p>
-
-          <div className="space-y-3 mt-4">
-            <button type="button" className="w-full border border-gray-400 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition">
-              Google
-            </button>
-            <button type="button" className="w-full border border-gray-400 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition">
-              SSO
-            </button>
-          </div>
-
-          <div className="flex justify-between mt-6 text-sm text-gray-600">
-            <span>Don't have an account?</span>
-            <span>Having issues logging in?</span>
-          </div>
-        </form>
-      </div>
+      {/* Footer */}
+      <footer className="bg-gray-800 text-gray-300 py-10 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <img src="/logo.png" alt="AgriGrid" className="h-10 mx-auto mb-4 opacity-70" />
+          <p className="text-sm">
+            © 2026 AgriGrid. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
-}
+};
+
+export default LandingPage;
