@@ -62,82 +62,81 @@ import SprayRecordDetail from './components/SprayRecordDetail';
 import SprayPlanDetail from './components/SprayPlanDetail';
 import SprayReport from './components/SprayReport';
 
-// NEW IMPORT - Make sure you create this file first!
+// NEW IMPORT - LandingPage
 import LandingPage from './components/LandingPage';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        
         <Routes>
-          {/* NEW: Public modern landing page at root */}
+          {/* Public modern landing page at root */}
           <Route path="/" element={<LandingPage />} />
 
-          {/* All existing app functionality now lives under /app */}
+          {/* All app functionality under /app */}
           <Route path="/app">
-            {/* Tenant selection - now at /app */}
+            {/* Tenant selection at /app */}
             <Route index element={<TenantEntry />} />
-            
-            {/* Login - now at /app/login/:tenant */}
-            <Route path="app/login/:tenant" element={<LoginPage />} />
-            
-            {/* Protected dashboard and all modules - now at /app/dashboard/:tenant/... */}
-            <Route path="app/dashboard/:tenant" element={<Layout />}>
+
+            {/* Login at /app/login/:tenant */}
+            <Route path="login/:tenant" element={<LoginPage />} />
+
+            {/* Protected dashboard at /app/dashboard/:tenant/... */}
+            <Route path="dashboard/:tenant" element={<Layout />}>
               <Route index element={<DashboardHome />} />
-              
+
               {/* Weather */}
-              <Route path="app/weather" element={<WeatherForecast />} />
-              <Route path="app/weather/day/:date" element={<DayDetail />} />
-              <Route path="app/weather/set-location" element={<SetWeatherLocation />} />
-              
+              <Route path="weather" element={<WeatherForecast />} />
+              <Route path="weather/day/:date" element={<DayDetail />} />
+              <Route path="weather/set-location" element={<SetWeatherLocation />} />
+
               {/* AgriMap */}
-              <Route path="app/map/blocks" element={<AgriMapView />} />
-              <Route path="app/map/blocks-table" element={<BlocksTable />} />
-              <Route path="app/map/define-blocks" element={<DefineBlocks />} />
-              <Route path="app/map/set-location" element={<SetFarmLocation />} />
-              <Route path="app/map/crop-types" element={<CropTypeList />} />
-              <Route path="app/map/crop-types/add" element={<CropTypeForm />} />
-              <Route path="app/map/crop-types/edit/:cropId" element={<CropTypeForm />} />
-              <Route path="app/map/assign-crop/:blockId" element={<AssignCrop />} />
-              
+              <Route path="map/blocks" element={<AgriMapView />} />
+              <Route path="map/blocks-table" element={<BlocksTable />} />
+              <Route path="map/define-blocks" element={<DefineBlocks />} />
+              <Route path="map/set-location" element={<SetFarmLocation />} />
+              <Route path="map/crop-types" element={<CropTypeList />} />
+              <Route path="map/crop-types/add" element={<CropTypeForm />} />
+              <Route path="map/crop-types/edit/:cropId" element={<CropTypeForm />} />
+              <Route path="map/assign-crop/:blockId" element={<AssignCrop />} />
+
               {/* User Management */}
-              <Route path="app/users" element={<UserManagement />} />
-              <Route path="app/users/add" element={<UserForm mode="add" />} />
-              <Route path="app/users/edit/:userId" element={<UserForm mode="edit" />} />
-              
+              <Route path="users" element={<UserManagement />} />
+              <Route path="users/add" element={<UserForm mode="add" />} />
+              <Route path="users/edit/:userId" element={<UserForm mode="edit" />} />
+
               {/* Admin Settings */}
-              <Route path="app/admin/company" element={<CompanySettings />} />
-              <Route path="app/admin/global" element={<GlobalSettings />} />
-              <Route path="app/admin/users" element={<UserManagement />} />
-              
+              <Route path="admin/company" element={<CompanySettings />} />
+              <Route path="admin/global" element={<GlobalSettings />} />
+              <Route path="admin/users" element={<UserManagement />} />
+
               {/* AgriSafe */}
-              <Route path="app/safety/hazards" element={<HazardList />} />
-              <Route path="app/safety/hazards/new" element={<HazardForm />} />
-              <Route path="app/safety/hazards/:hazardId" element={<HazardDetail />} />
-              <Route path="app/safety/hazard-types" element={<HazardTypeList />} />
-              <Route path="app/safety/hazard-types/add" element={<HazardTypeForm />} />
-              <Route path="app/safety/hazard-types/edit/:typeId" element={<HazardTypeForm />} />
-              <Route path="app/safety/incident-types" element={<IncidentTypeList />} />
-              <Route path="app/safety/incident-types/add" element={<IncidentTypeForm />} />
-              <Route path="app/safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
-              <Route path="app/safety/incidents" element={<IncidentList />} />
-              <Route path="app/safety/incidents/new" element={<IncidentForm />} />
-              <Route path="app/safety/incidents/:incidentId" element={<IncidentDetail />} />
+              <Route path="safety/hazards" element={<HazardList />} />
+              <Route path="safety/hazards/new" element={<HazardForm />} />
+              <Route path="safety/hazards/:hazardId" element={<HazardDetail />} />
+              <Route path="safety/hazard-types" element={<HazardTypeList />} />
+              <Route path="safety/hazard-types/add" element={<HazardTypeForm />} />
+              <Route path="safety/hazard-types/edit/:typeId" element={<HazardTypeForm />} />
+              <Route path="safety/incident-types" element={<IncidentTypeList />} />
+              <Route path="safety/incident-types/add" element={<IncidentTypeForm />} />
+              <Route path="safety/incident-types/edit/:typeId" element={<IncidentTypeForm />} />
+              <Route path="safety/incidents" element={<IncidentList />} />
+              <Route path="safety/incidents/new" element={<IncidentForm />} />
+              <Route path="safety/incidents/:incidentId" element={<IncidentDetail />} />
 
               {/* Inventory3 */}
-              <Route path="app/inventory/items" element={<ItemsList />} />
-              <Route path="app/inventory/items/new" element={<ItemForm />} />
-              <Route path="app/inventory/items/:itemId" element={<ItemDetail />} />
-              <Route path="app/inventory/items/edit/:itemId" element={<ItemForm />} />
-              <Route path="app/inventory/categories" element={<CategoryList />} />
-              <Route path="app/inventory/categories/add" element={<CategoryForm />} />
-              <Route path="app/inventory/categories/edit/:catId" element={<CategoryForm />} />
-              <Route path="app/inventory/warehouses" element={<WarehouseList />} />
-              <Route path="app/inventory/warehouses/add" element={<WarehouseForm />} />
-              <Route path="app/inventory/warehouses/edit/:whId" element={<WarehouseForm />} />
-              <Route path="app/inventory/stock" element={<StockList />} />
-              <Route path="app/inventory/items/:itemId/history" element={<StockHistory />} />
+              <Route path="inventory/items" element={<ItemsList />} />
+              <Route path="inventory/items/new" element={<ItemForm />} />
+              <Route path="inventory/items/:itemId" element={<ItemDetail />} />
+              <Route path="inventory/items/edit/:itemId" element={<ItemForm />} />
+              <Route path="inventory/categories" element={<CategoryList />} />
+              <Route path="inventory/categories/add" element={<CategoryForm />} />
+              <Route path="inventory/categories/edit/:catId" element={<CategoryForm />} />
+              <Route path="inventory/warehouses" element={<WarehouseList />} />
+              <Route path="inventory/warehouses/add" element={<WarehouseForm />} />
+              <Route path="inventory/warehouses/edit/:whId" element={<WarehouseForm />} />
+              <Route path="inventory/stock" element={<StockList />} />
+              <Route path="inventory/items/:itemId/history" element={<StockHistory />} />
 
               {/* Inventory - Suppliers */}
               <Route path="suppliers" element={<SuppliersList />} />
@@ -194,7 +193,7 @@ function App() {
             </Route>
           </Route>
 
-          {/* Optional: Redirect anything else to landing page */}
+          {/* Optional: Catch-all for unknown routes (redirect to landing) */}
           {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Routes>
       </BrowserRouter>
