@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-// Helper to get CSRF token from cookie (Django sets it on any response)
+// Helper to get CSRF token from cookie
 const getCsrfToken = () => {
   const name = 'csrftoken';
   const cookies = document.cookie.split(';');
@@ -16,9 +16,9 @@ const getCsrfToken = () => {
 };
 
 export default function LoginPage() {
-  const { tenant } = useParams();  // e.g., "costawalkamin" or "taryn"
+  const { tenant } = useParams();  // e.g., "costawalkamin"
   const navigate = useNavigate();
-  const { login } = useAuth();  // If you use AuthContext to store user
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -42,43 +42,49 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Use tenant-specific subdomain for API calls
-      const apiUrl = `https://${tenant}.agrigrid.net/api/login/`;
-
-      const csrfToken = getCsrfToken();
+      // CHANGE 1: Always POST to the public domain (www) for authentication
+      const apiUrl = 'https://www.agrigrid.net/api/login/';
 
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // 'X-CSRFToken': csrfToken || '',  // Required for Django CSRF protection
+          // 'X-CSRFToken': getCsrfToken() || '',  // Uncomment if you get CSRF errors
         },
+        credentials: 'include',  // Essential for Django session cookie
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
+          tenant_slug: tenant,  // CHANGE 2: Send the tenant code from the URL
         }),
-        credentials: 'include',  // Important: sends/receives session cookie
       });
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
-        // Save user data (adjust based on your backend response)
+      if (res.ok && data.success && data.redirect_to) {
+        // Store user if needed
         localStorage.setItem('user', JSON.stringify(data.user));
-        if (login) login(data.user);  // Update AuthContext if used
+ if (login) login(data.user);
 
-        // Navigate to dashboard under /app
-        navigate(`/app/dashboard/${tenant}`);
+        // CHANGE 3: Redirect to the tenant subdomain
+        window.location.href = data.redirect_to;
+        return;  // Stop execution after redirect
       } else {
-        setError(data.message || 'Invalid credentials or inactive account');
+        setError(data.message || 'Invalid credentials or no access to this farm');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Network error — check your connection or tenant code');
+      setError('Network error — check your connection or farm code');
     } finally {
       setLoading(false);
     }
   };
+
+  // ... rest of your JSX stays 100% the same (logo, form, buttons, etc.) ...
+  return (
+    // ... your existing JSX unchanged ...
+  );
+}
 
   return (
     <div className="min-h-screen bg-light flex items-center justify-center p-4">
