@@ -1,0 +1,36 @@
+{
+  "rewrites": [
+    {
+      "source": "/app/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/register/(.*)",
+      "dest": "http://170.64.220.153/register/$1",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "http://170.64.220.153/api/$1",
+      "methods": ["GET", "POST", "OPTIONS", "PATCH", "DELETE", "PUT"]
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "http://170.64.220.153/media/$1"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "http://170.64.220.153/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

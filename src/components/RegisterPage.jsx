@@ -31,8 +31,14 @@ export default function RegisterPage() {
       return;
     }
 
+    if (formData.domain.trim() === '') {
+      setError('Farm code is required');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch('https://www.agrigrid.net/register/', {
+      const res = await fetch('/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -47,15 +53,15 @@ export default function RegisterPage() {
 
       if (res.ok || res.redirected) {
         const subdomain = formData.domain.toLowerCase().trim();
-        setSuccess(`Farm created successfully! Your farm is at https://${subdomain}.agrigrid.net`);
-        setTimeout(() => navigate('/app'), 4000);
+        setSuccess(`Farm created! Your farm URL: https://${subdomain}.agrigrid.net`);
+        setTimeout(() => navigate('/app'), 5000);
       } else {
         const text = await res.text();
-        setError(text || 'Registration failed. Check your details.');
+        setError(text || 'Registration failed — check your details');
       }
     } catch (err) {
-      console.error(err);
-      setError('Network error — cannot reach backend');
+      console.error('Registration error:', err);
+      setError('Network error — cannot reach server');
     } finally {
       setLoading(false);
     }
@@ -86,7 +92,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Farm Code</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Farm Code (subdomain)</label>
             <input
               type="text"
               name="domain"
@@ -96,7 +102,7 @@ export default function RegisterPage() {
               placeholder="e.g. gordon2026"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
-            <p className="text-xs text-gray-500 mt-1">This will be your subdomain</p>
+            <p className="text-xs text-gray-500 mt-1">Becomes yourfarm.agrigrid.net</p>
           </div>
 
           <div>
@@ -147,7 +153,7 @@ export default function RegisterPage() {
 
         <button
           onClick={() => navigate('/app')}
-          className="w-full mt-4 text-sm text-blue-600 hover:underline"
+          className="w-full mt-6 text-center text-sm text-blue-600 hover:underline"
         >
           Back to Login
         </button>
