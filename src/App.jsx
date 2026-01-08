@@ -62,6 +62,9 @@ import SprayRecordDetail from './components/SprayRecordDetail';
 import SprayPlanDetail from './components/SprayPlanDetail';
 import SprayReport from './components/SprayReport';
 
+// TEMPORARY IMPORT - LoginTest
+import LoginTest from './components/LoginTest';
+
 // NEW IMPORT - LandingPage
 import LandingPage from './components/LandingPage';
 
@@ -190,6 +193,11 @@ function App() {
               <Route path="spray/record/:recordId" element={<SprayRecordDetail />} />
               <Route path="spray/plans/:planId" element={<SprayPlanDetail />} />
               <Route path="spray/report" element={<SprayReport />} />
+
+              {/* Temporary Login Test */}
+              <Route path="login-test/:tenant" element={<LoginTest />} />
+
+
             </Route>
           </Route>
 
