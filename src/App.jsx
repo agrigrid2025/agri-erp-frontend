@@ -83,6 +83,7 @@ function App() {
 
             {/* Login at /app/login/:tenant */}
             <Route path="login/:tenant" element={<LoginPage />} />
+            <Route path="login-test/:tenant" element={<LoginTest />} />
 
             {/* Protected dashboard at /app/dashboard/:tenant/... */}
             <Route path="dashboard/:tenant" element={<Layout />}>
@@ -193,11 +194,6 @@ function App() {
               <Route path="spray/record/:recordId" element={<SprayRecordDetail />} />
               <Route path="spray/plans/:planId" element={<SprayPlanDetail />} />
               <Route path="spray/report" element={<SprayReport />} />
-
-              {/* Temporary Login Test */}
-              <Route path="login-test/:tenant" element={<LoginTest />} />
-
-
             </Route>
           </Route>
 
