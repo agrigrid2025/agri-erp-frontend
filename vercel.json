@@ -5,31 +5,31 @@
       "destination": "/index.html"
     },
     {
+      "source": "/register/",
+      "destination": "http://170.64.220.153/register/"
+    },
+    {
+      "source": "/register",
+      "destination": "http://170.64.220.153/register/"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "http://170.64.220.153/api/$1"
+    },
+    {
+      "source": "/media/(.*)",
+      "destination": "http://170.64.220.153/media/$1"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "http://170.64.220.153/static/$1"
+    },
+    {
       "source": "/",
       "destination": "/index.html"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/register/(.*)",
-      "dest": "http://170.64.220.153/register/$1",
-      "methods": ["GET", "POST"]
     },
     {
-      "src": "/api/(.*)",
-      "dest": "http://170.64.220.153/api/$1",
-      "methods": ["GET", "POST", "OPTIONS", "PATCH", "DELETE", "PUT"]
-    },
-    {
-      "src": "/media/(.*)",
-      "dest": "http://170.64.220.153/media/$1"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "http://170.64.220.153/static/$1"
-    },
-    {
-      "src": "/(.*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
