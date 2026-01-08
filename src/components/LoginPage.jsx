@@ -80,12 +80,6 @@ export default function LoginPage() {
     }
   };
 
-  // ... rest of your JSX stays 100% the same (logo, form, buttons, etc.) ...
-  return (
-    // ... your existing JSX unchanged ...
-  );
-}
-
   return (
     <div className="min-h-screen bg-light flex items-center justify-center p-4">
       <div className="card shadow-sm p-8" style={{ maxWidth: '400px', width: '100%' }}>
