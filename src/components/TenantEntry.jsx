@@ -46,6 +46,15 @@ export default function TenantEntry() {
             Continue
           </button>
         </form>
+        <div className="text-center mt-6">
+          <button
+            onClick={() => navigate('/app/register')}
+            className="text-blue-600 hover:underline text-sm"
+          >
+            Create a new test farm
+          </button>
+        </div>
+
 
         <p className="text-center text-gray-500 text-sm mt-8">
           Having issues? Contact support.

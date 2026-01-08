@@ -61,6 +61,7 @@ import SprayRecordForm from './components/SprayRecordForm';
 import SprayRecordDetail from './components/SprayRecordDetail';
 import SprayPlanDetail from './components/SprayPlanDetail';
 import SprayReport from './components/SprayReport';
+import RegisterPage from './components/RegisterPage';
 
 // TEMPORARY IMPORT - LoginTest
 import LoginTest from './components/LoginTest';
@@ -75,6 +76,9 @@ function App() {
         <Routes>
           {/* Public modern landing page at root */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Tenant Registration */}
+          <Route path="/app/register" element={<RegisterPage />} />
 
           {/* All app functionality under /app */}
           <Route path="/app">
