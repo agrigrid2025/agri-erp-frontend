@@ -81,8 +81,6 @@ function App() {
 
           {/* All app functionality under /app */}
           <Route path="/app">
-            {/* Tenant selection at /app */}
-            <Route index element={<TenantEntry />} />
 
             {/* Login at /app/login/:tenant */}
             <Route path="login/:tenant" element={<LoginPage />} />
