@@ -83,7 +83,8 @@ function App() {
           <Route path="/app">
 
             {/* Login at /app/login/:tenant */}
-            <Route path="login/:tenant" element={<LoginPage />} />
+            <Route path="/app/login" element={<LoginPage />} />
+            {/* <Route path="login/:tenant" element={<LoginPage />} /> */}
             <Route path="login-test/:tenant" element={<LoginTest />} />
 
             {/* Protected dashboard at /app/dashboard/:tenant/... */}
