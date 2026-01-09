@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import TenantEntry from './components/TenantEntry';
 import LoginPage from './components/LoginPage';
 import Layout from './components/Layout';
 import DashboardHome from './components/DashboardHome';

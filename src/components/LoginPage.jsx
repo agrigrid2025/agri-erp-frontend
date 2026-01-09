@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// Helper to get CSRF token from cookie (optional, uncomment if CSRF issues arise)
 const getCsrfToken = () => {
   const name = 'csrftoken';
   const cookies = document.cookie.split(';');
@@ -15,11 +16,10 @@ const getCsrfToken = () => {
 };
 
 export default function LoginPage() {
-  const { tenant } = useParams(); // e.g., "costawalkamin"
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
     remember: false,
   });
@@ -46,28 +46,32 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
           // 'X-CSRFToken': getCsrfToken() || '', // Uncomment if CSRF errors occur
         },
-        credentials: 'include',
+        credentials: 'include', // Essential for Django session cookie
         body: JSON.stringify({
-          username: formData.username,
+          email: formData.email,
           password: formData.password,
-          tenant_slug: tenant, // Critical: tells backend which farm
         }),
       });
 
       const data = await res.json();
 
-      if (res.ok && data.success && data.redirect_to) {
+      if (res.ok && data.success) {
         localStorage.setItem('user', JSON.stringify(data.user));
         if (login) login(data.user);
 
-        // Redirect to tenant subdomain
-        window.location.href = data.redirect_to;
+        if (data.redirect_to) {
+          // Automatic redirect to the user's default tenant subdomain
+          window.location.href = data.redirect_to;
+        } else if (data.multiple_tenants) {
+          // Optional: handle multiple tenants (you can expand this later)
+          setError('You have access to multiple farms. Please contact support for selection.');
+        }
       } else {
-        setError(data.message || 'Invalid credentials or no access to this farm');
+        setError(data.message || 'Invalid email or password');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Network error — check your connection or farm code');
+      setError('Network error — please try again');
     } finally {
       setLoading(false);
     }
@@ -76,12 +80,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-light flex items-center justify-center p-4">
       <div className="card shadow-sm p-8" style={{ maxWidth: '400px', width: '100%' }}>
+        {/* Logo + Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img src="/logo.png" alt="AgriGrid Logo" className="h-10" />
             <h1 className="text-3xl font-bold text-gray-800">AgriGrid</h1>
           </div>
-          <p className="text-gray-600 text-sm uppercase">{tenant || 'Farm'}</p>
         </div>
 
         <h4 className="text-xl font-semibold mb-6 text-center">Log in</h4>
@@ -94,18 +98,18 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-              Email / Username
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
             </label>
             <input
-              type="text"
-              name="username"
-              id="username"
-              value={formData.username}
+              type="email"
+              name="email"
+              id="email"
+              value={formData.email}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Username or email"
+              placeholder="your@email.com"
             />
           </div>
 
