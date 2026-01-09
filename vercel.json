@@ -1,11 +1,41 @@
 {
   "rewrites": [
     { "source": "/app/(.*)", "destination": "/index.html" },
-    { "source": "/register/", "destination": "http://170.64.220.153/register/" },
-    { "source": "/register", "destination": "http://170.64.220.153/register/" },
-    { "source": "/api/(.*)", "destination": "http://170.64.220.153/api/$1" },
-    { "source": "/media/(.*)", "destination": "http://170.64.220.153/media/$1" },
-    { "source": "/static/(.*)", "destination": "http://170.64.220.153/static/$1" },
+    {
+      "source": "/register/",
+      "destination": "http://170.64.220.153:8000/register/",
+      "headers": {
+        "Host": "{host}"
+      }
+    },
+    {
+      "source": "/register",
+      "destination": "http://170.64.220.153:8000/register/",
+      "headers": {
+        "Host": "{host}"
+      }
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "http://170.64.220.153:8000/api/$1",
+      "headers": {
+        "Host": "{host}"
+      }
+    },
+    {
+      "source": "/media/(.*)",
+      "destination": "http://170.64.220.153:8000/media/$1",
+      "headers": {
+        "Host": "{host}"
+      }
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "http://170.64.220.153:8000/static/$1",
+      "headers": {
+        "Host": "{host}"
+      }
+    },
     { "source": "/", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
