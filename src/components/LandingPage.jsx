@@ -29,7 +29,7 @@ const LandingPage = () => {
               Join the Revolution – Apply for Beta
             </button>
             <Link
-              to="/app"
+              to="/app/login"  // Updated: Direct to global login page (no tenant needed)
               className="inline-block bg-transparent border-2 border-green-400 hover:bg-green-400 hover:text-black font-bold text-xl px-12 py-5 rounded-full transition"
             >
               Login for Approved Beta Users
